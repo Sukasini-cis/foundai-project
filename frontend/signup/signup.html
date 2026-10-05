@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="foundAIApp">
+<head>
+    <meta charset="UTF-8">
+    <title>FoundAI | Sign Up</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-animate/1.8.3/angular-animate.min.js"></script>
+
+    <style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f4f5fb;
+}
+
+.card {
+  max-width: 640px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(30,20,90,.08);
+  padding: 32px 40px 40px;
+}
+
+.brand {
+  text-align: center;
+  font-weight: 700;
+  color: #5b4bda;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.verify-banner {
+  background: #edeafd;
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: #4b3fb0;
+  margin-bottom: 24px;
+}
+
+.verify-banner b{
+  display:block;
+  margin-bottom:4px;
+  letter-spacing:.5px;
+  font-size:11px;
+  color:#5b4bda;
+}
+
+.section-label{
+  font-size:12px;
+  font-weight:700;
+  color:#7a6fe0;
+  letter-spacing:1px;
+  margin:22px 0 10px;
+}
+
+.row{
+  display:flex;
+  gap:16px;
+  margin-bottom:14px;
+}
+
+.field{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+label{
+  font-size:11px;
+  color:#888;
+  margin-bottom:5px;
+}
+
+input,
+select{
+  padding:10px 12px;
+  border:1px solid #e1e1ec;
+  border-radius:8px;
+  font-size:13px;
+  outline:none;
+}
+
+input:focus,
+select:focus{
+  border-color:#7a6fe0;
+}
+
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched{
+  border-color:#e0546b;
+}
+
+.hint{
+  font-size:11px;
+  color:#aaa;
+  margin-top:4px;
+}
+
+.error-text{
+  font-size:11px;
+  color:#e0546b;
+  margin-top:4px;
+}
+
+.terms{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+  color:#666;
+  margin:18px 0;
+}
+
+.terms a{
+  color:#5b4bda;
+  text-decoration:none;
+}
+
+.submit-btn{
+  width:100%;
+  padding:13px;
+  background:#6c5ce7;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.submit-btn:disabled{
+  background:#c9c3f5;
+  cursor:not-allowed;
+}
+
+.login-link{
+  text-align:center;
+  font-size:13px;
+  color:#888;
+  margin-top:16px;
+}
+
+.login-link a{
+  color:#6c5ce7;
+  text-decoration:none;
+}
+
+.match-preview{
+  font-size:12px;
+  color:#2ecc71;
+  text-align:center;
+  margin-top:6px;
+}
+
+select option[disabled]{
+  color:#aaa;
+}
+
+/* -----------------------------------------------------------------
+   Below: purely additive animation styles. Nothing above was
+   changed — these power the fa-* directives in signup.js plus
+   AngularJS's built-in ngAnimate hooks for ng-show / ng-if.
+------------------------------------------------------------------ */
+
+/* Card entrance (fa-card-enter) */
+.fa-card-enter-start{
+  opacity:0;
+  transform:translateY(24px) scale(.98);
+}
+.fa-card-enter-active{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  transition:opacity .5s cubic-bezier(.22,.61,.36,1), transform .5s cubic-bezier(.22,.61,.36,1);
+}
+
+/* Simple fade-in (fa-fade-in) */
+.fa-fade-in-start{
+  opacity:0;
+  transform:translateY(-6px);
+}
+.fa-fade-in-active{
+  opacity:1;
+  transform:translateY(0);
+  transition:opacity .45s ease, transform .45s ease;
+}
+
+/* Staggered section labels (fa-stagger) */
+.fa-stagger-start{
+  opacity:0;
+  transform:translateX(-10px);
+}
+.fa-stagger-active{
+  opacity:1;
+  transform:translateX(0);
+  transition:opacity .4s ease, transform .4s ease;
+}
+
+/* Shake on validation error (fa-shake) */
+@keyframes fa-shake-kf{
+  0%, 100% { transform:translateX(0); }
+  20% { transform:translateX(-6px); }
+  40% { transform:translateX(5px); }
+  60% { transform:translateX(-4px); }
+  80% { transform:translateX(3px); }
+}
+.fa-shake-play{
+  animation:fa-shake-kf .4s ease;
+}
+
+/* Button ripple (fa-ripple) */
+.submit-btn{
+  position:relative;
+  overflow:hidden;
+  transition:background .25s ease, transform .15s ease, box-shadow .25s ease;
+}
+.submit-btn:not(:disabled):hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 18px rgba(108,92,231,.35);
+}
+.submit-btn:not(:disabled):active{
+  transform:translateY(0);
+}
+.fa-ripple-dot{
+  position:absolute;
+  border-radius:50%;
+  background:rgba(255,255,255,.55);
+  transform:scale(0);
+  animation:fa-ripple-kf .55s ease-out;
+  pointer-events:none;
+}
+@keyframes fa-ripple-kf{
+  to{
+    transform:scale(2.2);
+    opacity:0;
+  }
+}
+
+/* Match-rate pop-in (fa-pop-in) */
+@keyframes fa-pop-in-kf{
+  0%   { opacity:0; transform:scale(.6) translateY(6px); }
+  60%  { opacity:1; transform:scale(1.08) translateY(0); }
+  100% { opacity:1; transform:scale(1) translateY(0); }
+}
+.fa-pop-in-play{
+  animation:fa-pop-in-kf .45s cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ngAnimate hooks: ng-if enter/leave for .match-preview */
+.match-preview.ng-enter{
+  transition:opacity .35s ease, transform .35s ease;
+  opacity:0;
+  transform:translateY(6px);
+}
+.match-preview.ng-enter.ng-enter-active{
+  opacity:1;
+  transform:translateY(0);
+}
+.match-preview.ng-leave{
+  transition:opacity .25s ease;
+  opacity:1;
+}
+.match-preview.ng-leave.ng-leave-active{
+  opacity:0;
+}
+
+/* ngAnimate hooks: ng-show/ng-hide for .error-text */
+.error-text.ng-hide-add,
+.error-text.ng-hide-remove{
+  transition:opacity .25s ease, transform .25s ease;
+}
+.error-text.ng-hide-add-active,
+.error-text.ng-hide{
+  opacity:0;
+  transform:translateY(-3px);
+}
+.error-text.ng-hide-remove-active{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* Shimmering brand title (fa-shimmer) */
+.fa-shimmer{
+  background:linear-gradient(90deg, #5b4bda 0%, #a89bff 25%, #5b4bda 50%, #a89bff 75%, #5b4bda 100%);
+  background-size:200% auto;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:fa-shimmer-kf 3.5s linear infinite;
+}
+@keyframes fa-shimmer-kf{
+  to{ background-position:-200% center; }
+}
+
+/* Pulsing loading state on the submit button (fa-btn-loading, tied to vm.submitting) */
+@keyframes fa-btn-loading-kf{
+  0%, 100% { opacity:1; }
+  50% { opacity:.7; }
+}
+.fa-btn-loading{
+  animation:fa-btn-loading-kf 1s ease-in-out infinite;
+}
+
+/* Slightly livelier input focus (works with the existing input:focus rule) */
+input, select{
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+input:focus, select:focus{
+  box-shadow:0 0 0 3px rgba(122,111,224,.15);
+}
+</style>
+</head>
+
+<body ng-controller="SignupController as vm">
+
+<div class="card" fa-card-enter>
+
+    <div class="brand fa-shimmer">Found AI</div>
+
+    <div class="verify-banner" fa-fade-in delay="150">
+        <b>IDENTITY VERIFICATION</b>
+        To ensure safe item returns, all users must complete a one-time identity check.
+        Verified members gain access to the Global Recovery Network and priority AI matching.
+    </div>
+
+    <form name="signupForm" novalidate ng-submit="vm.submit(signupForm.$valid)">
+
+        <div class="section-label" fa-stagger index="0">01. ACCOUNT CREDENTIALS</div>
+
+        <div class="row">
+            <div class="field">
+                <label>FULL NAME</label>
+                <input type="text" name="fullName" ng-model="vm.user.fullName" required placeholder="John Doe">
+            </div>
+
+            <div class="field">
+                <label>USERNAME</label>
+                <input type="text" name="username" ng-model="vm.user.username" required placeholder="johndoe_recovery">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="field" fa-shake="signupForm.email.$invalid && signupForm.email.$touched">
+                <label>EMAIL ADDRESS</label>
+
+                <input type="email"
+                       name="email"
+                       ng-model="vm.user.email"
+                       required
+                       placeholder="john@example.com">
+
+                <span class="error-text"
+                      ng-show="signupForm.email.$touched && signupForm.email.$invalid">
+                    Enter a valid email
+                </span>
+            </div>
+
+            <div class="field">
+                <label>PHONE NUMBER</label>
+                <input type="tel" name="phone" ng-model="vm.user.phone" placeholder="+1 (555) 000-0000">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="field">
+                <label>SECURE PASSWORD</label>
+
+                <input type="password"
+                       name="password"
+                       ng-model="vm.user.password"
+                       required
+                       ng-pattern="/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/">
+
+                <span class="hint">
+                    At least 8 chars, 1 uppercase, and 1 special symbol.
+                </span>
+            </div>
+        </div>
+
+        <div class="section-label" fa-stagger index="1">02. IDENTITY VERIFICATION</div>
+
+        <div class="row">
+            <div class="field">
+                <label>ORGANIZATION / UNIVERSITY</label>
+                <input type="text" ng-model="vm.user.organization" placeholder="e.g. Stanford University">
+            </div>
+
+            <div class="field">
+                <label>DEPARTMENT / MAJOR</label>
+                <input type="text" ng-model="vm.user.department" placeholder="e.g. Computer Science">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="field">
+                <label>STUDENT REG NO:</label>
+                <input type="text" ng-model="vm.user.studentId" placeholder="e.g. STD-2026-8819">
+            </div>
+
+        </div>
+
+       
+        
+        
+
+        <div class="terms">
+            <input type="checkbox" ng-model="vm.user.agreed" required>
+
+            <span>
+                I agree to the <a href="#">Terms of Service</a>
+                and acknowledge the
+                <a href="#">Identity Verification</a> security protocol.
+            </span>
+        </div>
+
+        <button type="submit"
+                class="submit-btn"
+                fa-ripple
+                ng-class="{'fa-btn-loading': vm.submitting}"
+                ng-disabled="signupForm.$invalid || !vm.user.agreed">
+
+            {{ vm.submitting ? 'Creating Account...' : 'Create FoundAI Account →' }}
+
+        </button>
+
+        <div class="match-preview" ng-if="vm.matchRate" fa-pop-in>
+            {{ vm.matchRate | matchRateFilter }} match rate in urban centers
+        </div>
+
+        <div class="login-link">
+            Already have an account?
+           <a href="../login/index.html">Login</a>
+        </div>
+
+    </form>
+
+</div>
+
+<script>
+angular.module('foundAIApp', ['ngAnimate'])
+
+.service('SignupService', function ($http) {
+
+    this.transitModes = [
+        { value: 'walk', label: 'Walking', active: true },
+        { value: 'bike', label: 'Bicycle', active: true },
+        { value: 'bus', label: 'Campus Shuttle', active: true },
+        { value: 'car', label: 'Personal Vehicle', active: true },
+        { value: 'other', label: 'Other', active: false }
+    ];
+
+    this.securityQuestions = [
+        "What was your first pet's name?",
+        "What city were you born in?",
+        "What is your mother's maiden name?"
+    ];
+
+    this.registerUser = function (user) {
+
+        return $http.post(
+            "http://localhost:5000/api/auth/signup",
+            user
+        );
+
+    };
+
+})
+
+.filter('matchRateFilter', function () {
+
+    return function (value) {
+
+        if (value == null) return "";
+
+        return parseFloat(value).toFixed(1) + "%";
+    };
+
+})
+
+.controller('SignupController', ['SignupService', function (SignupService) {
+
+    var vm = this;
+
+    vm.user = {
+        fullName: '',
+        username: '',
+        email: '',
+        phone: '',
+        password: '',
+        organization: '',
+        department: '',
+        studentId: '',
+        rfidId: '',
+        campusZone: '',
+        transitMethod: '',
+        emergencyContact: '',
+        emergencyPhone: '',
+        securityQuestion: '',
+        securityAnswer: '',
+        agreed: false
+    };
+
+    vm.transitModes = SignupService.transitModes;
+    vm.securityQuestions = SignupService.securityQuestions;
+
+    vm.activeOnly = {
+        active: true
+    };
+
+    vm.submitting = false;
+    vm.matchRate = null;
+
+    vm.submit = function (isValid) {
+
+        if (!isValid || !vm.user.agreed)
+            return;
+
+        vm.submitting = true;
+
+        SignupService.registerUser(vm.user).then(
+
+            function (response) {
+
+                vm.submitting = false;
+
+                alert("Signup successful!");
+
+                window.location.href = "../login/index.html";
+
+            },
+
+            function (error) {
+
+                vm.submitting = false;
+
+                if (error.data && error.data.message) {
+                    alert(error.data.message);
+                } else {
+                    alert("Signup failed");
+                }
+
+            }
+
+        );
+
+    };
+
+}])
+
+// ---------------------------------------------------------------
+// Below: purely additive animation directives. None of the code
+// above was changed — these just hook into elements via new
+// attributes added in signup.html (fa-card-enter, fa-fade-in,
+// fa-stagger, fa-shake, fa-ripple, fa-pop-in).
+// ---------------------------------------------------------------
+
+// Slide + fade the whole card in on load.
+.directive('faCardEnter', function ($timeout) {
+    return {
+        restrict: 'A',
+        link: function (scope, element) {
+            element.addClass('fa-card-enter-start');
+            $timeout(function () {
+                element.addClass('fa-card-enter-active');
+            }, 30);
+        }
+    };
+})
+
+// Simple delayed fade-in, delay in ms via the `delay` attribute.
+.directive('faFadeIn', function ($timeout) {
+    return {
+        restrict: 'A',
+        scope: { delay: '@' },
+        link: function (scope, element) {
+            var delay = parseInt(scope.delay, 10) || 0;
+            element.addClass('fa-fade-in-start');
+            $timeout(function () {
+                element.addClass('fa-fade-in-active');
+            }, delay);
+        }
+    };
+})
+
+// Staggered fade-up for section labels, order set by the `index` attribute.
+.directive('faStagger', function ($timeout) {
+    return {
+        restrict: 'A',
+        scope: { index: '@' },
+        link: function (scope, element) {
+            var order = parseInt(scope.index, 10) || 0;
+            element.addClass('fa-stagger-start');
+            $timeout(function () {
+                element.addClass('fa-stagger-active');
+            }, 200 + order * 120);
+        }
+    };
+})
+
+// Shakes the element whenever the bound watch expression becomes true
+// (used to draw attention to a field that just became invalid).
+.directive('faShake', function () {
+    return {
+        restrict: 'A',
+        scope: { faShake: '=' },
+        link: function (scope, element) {
+            scope.$watch('faShake', function (isInvalid, wasInvalid) {
+                if (isInvalid && !wasInvalid) {
+                    element.addClass('fa-shake-play');
+                    element.on('animationend', function () {
+                        element.removeClass('fa-shake-play');
+                    });
+                }
+            });
+        }
+    };
+})
+
+// Material-style ripple on click, purely visual, doesn't touch ng-click/ng-submit.
+.directive('faRipple', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element) {
+            element.on('click', function (event) {
+                var rect = element[0].getBoundingClientRect();
+                var ripple = angular.element('<span class="fa-ripple-dot"></span>');
+                var size = Math.max(rect.width, rect.height);
+
+                ripple.css({
+                    width: size + 'px',
+                    height: size + 'px',
+                    left: (event.clientX - rect.left - size / 2) + 'px',
+                    top: (event.clientY - rect.top - size / 2) + 'px'
+                });
+
+                element.append(ripple);
+
+                ripple.on('animationend', function () {
+                    ripple.remove();
+                });
+            });
+        }
+    };
+})
+
+// Little bounce-in "pop" for the match-rate banner when it appears.
+.directive('faPopIn', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element) {
+            element.addClass('fa-pop-in-play');
+        }
+    };
+});
+</script>
+
+</body>
+</html>

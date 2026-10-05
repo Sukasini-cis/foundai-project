@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="foundAI">
+<head>
+<meta charset="UTF-8">
+<title>FoundAI — Intelligent Recovery</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-animate/1.8.3/angular-animate.min.js" crossorigin="anonymous"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#f4f2fb;
+
+    --line:#e7e3f5;
+
+    --text:#0d0a1f;
+    --muted:#5c5877;
+
+    --purple:#6d3ff2;
+    --purple-dim:#4c2f9e;
+    --purple-light:#8b5cf6;
+
+    --teal:#22c55e;
+    --amber:#f5a524;
+
+    --radius:14px;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:
+        radial-gradient(900px 400px at 85% -10%, rgba(109,63,242,.15), transparent 60%),
+        var(--bg);
+
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+}
+
+h1,
+h2,
+h3,
+.brand,
+.stat-value{
+    font-family:'Space Grotesk',sans-serif;
+}
+
+.mono{
+    font-family:'IBM Plex Mono',monospace;
+}
+
+.shell{
+    display:grid;
+    grid-template-columns:230px 1fr 300px;
+    min-height:100vh;
+}
+
+/* ================= Sidebar ================= */
+
+.sidebar{
+    background:#ffffff;
+    border-right:1px solid var(--line);
+    padding:22px 16px;
+}
+
+.brand{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:26px;
+    padding:0 6px;
+}
+
+.brand .dot{
+    width:34px;
+    height:34px;
+    border-radius:10px;
+    background:linear-gradient(135deg,#6d3ff2,#4c2f9e);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-weight:700;
+    flex-shrink:0;
+    animation:brandGlow 3s ease-in-out infinite;
+}
+
+@keyframes brandGlow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(109,63,242,.35); }
+    50%{ box-shadow:0 0 0 8px rgba(109,63,242,0); }
+}
+
+.brand div span{
+    display:block;
+}
+
+.brand .name{
+    font-size:15px;
+    font-weight:600;
+}
+
+.brand .tag{
+    font-size:9px;
+    letter-spacing:.14em;
+    color:var(--muted);
+}
+
+.search-box{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:12.5px;
+    color:var(--muted);
+    margin-bottom:20px;
+}
+
+.search-box input{
+    width:100%;
+    background:transparent;
+    border:0;
+    outline:none;
+    color:var(--text);
+    font-size:12.5px;
+    font-family:inherit;
+}
+
+.search-box input::placeholder{
+    color:var(--muted);
+}
+
+nav.navlist a{
+    display:flex;
+    align-items:center;
+    gap:11px;
+
+    padding:10px 12px;
+
+    margin-bottom:2px;
+
+    border-radius:9px;
+
+    text-decoration:none;
+
+    color:var(--muted);
+
+    font-size:13.5px;
+
+    font-weight:500;
+
+    transition:.2s;
+
+    cursor:pointer;
+}
+
+nav.navlist a:hover{
+    background:#f4f2fb;
+    color:var(--text);
+}
+
+nav.navlist a.active{
+    background:rgba(109,63,242,.10);
+    border-left:3px solid var(--purple);
+
+    color:var(--purple);
+
+    padding-left:9px;
+}
+
+nav.navlist a .ic{
+    width:18px;
+    text-align:center;
+}
+
+nav.navlist a .badge{
+    margin-left:auto;
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:var(--purple);
+}
+
+.nav-divider{
+    height:1px;
+
+    background:var(--line);
+
+    margin:14px 0;
+}
+
+/* ================= Main ================= */
+
+main{
+    padding:22px 26px;
+    overflow-x:hidden;
+}
+
+.hello h1{
+    margin:0 0 4px;
+    font-size:24px;
+}
+
+.hello p{
+    margin:0;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.stat-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin:20px 0;
+}
+
+.stat-card{
+    background:#ffffff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px;
+}
+
+.stat-card.hero{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(135deg,#6d3ff2,#4c2f9e);
+    border:none;
+    color:white;
+    animation:heroCardGlow 3s ease-in-out infinite;
+}
+
+.stat-card.hero::after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-150%;
+    width:60%;
+    height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.25), transparent);
+    transform:skewX(-20deg);
+    animation:statShimmer 3.6s ease-in-out infinite;
+}
+
+@keyframes heroCardGlow{
+    0%,100%{ box-shadow:0 0 0 0 rgba(109,63,242,0); }
+    50%{ box-shadow:0 8px 30px 0 rgba(109,63,242,.35); }
+}
+
+@keyframes statShimmer{
+    0%{ left:-150%; }
+    60%,100%{ left:150%; }
+}
+
+.stat-label{
+    font-size:10.5px;
+    letter-spacing:.09em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:600;
+}
+
+.stat-card.hero .stat-label{
+    color:#e7dcff;
+}
+
+.stat-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.stat-icon{
+    font-size:16px;
+}
+
+.stat-value{
+    margin-top:6px;
+    font-size:27px;
+    font-weight:700;
+}
+
+.stat-sub{
+    margin-top:4px;
+    color:var(--teal);
+    font-size:11px;
+    font-weight:600;
+}
+
+.stat-card.hero .stat-sub{
+    color:#ffffff;
+}
+/* ================= Panels ================= */
+
+.panel{
+    background:#ffffff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:0 8px 25px rgba(109,63,242,.06);
+}
+
+.panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:16px;
+}
+
+.panel-head h3{
+    margin:0;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color:var(--text);
+}
+
+/* ================= Highlights ================= */
+
+.range-tabs{
+    display:flex;
+    gap:4px;
+    padding:3px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+}
+
+.range-tabs button{
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    font:600 12px 'Inter',sans-serif;
+    padding:6px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.range-tabs button:hover{
+    color:var(--text);
+}
+
+.range-tabs button.active{
+    background:#ffffff;
+    color:var(--purple);
+    box-shadow:0 2px 8px rgba(109,63,242,.15);
+}
+
+.hl-wrap{
+    position:relative;
+}
+
+.hl-track{
+    display:flex;
+    gap:16px;
+    overflow-x:auto;
+    padding:4px 2px 18px;
+    margin-bottom:-6px;
+    cursor:grab;
+    user-select:none;
+    -webkit-user-select:none;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+}
+
+.hl-track::-webkit-scrollbar{
+    display:none;
+}
+
+.hl-track.dragging{
+    cursor:grabbing;
+    scroll-snap-type:none;
+}
+
+.hl-track:focus-visible{
+    outline:2px solid var(--purple-light);
+    outline-offset:2px;
+    border-radius:12px;
+}
+
+.hl-card{
+    flex:0 0 240px;
+    scroll-snap-align:start;
+    background:#ffffff;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:0 5px 15px rgba(109,63,242,.05);
+}
+
+.hl-photo{
+    position:relative;
+    height:160px;
+    background:var(--panel-2);
+}
+
+.hl-photo img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    pointer-events:none;
+}
+
+.hl-badge{
+    position:absolute;
+    top:10px;
+    left:10px;
+    padding:3px 10px;
+    border-radius:20px;
+    background:#ffffff;
+    font-size:11px;
+    font-weight:700;
+    text-transform:capitalize;
+    box-shadow:0 4px 10px rgba(0,0,0,.12);
+}
+
+.hl-badge.returned{ color:var(--teal); }
+.hl-badge.found{    color:var(--teal); }
+.hl-badge.match{    color:var(--purple); }
+.hl-badge.lost{     color:var(--amber); }
+
+.hl-body{
+    padding:12px 14px 14px;
+}
+
+.hl-body h4{
+    margin:0 0 8px;
+    font-size:14px;
+    color:var(--text);
+}
+
+.hl-meta{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    font-size:11.5px;
+    color:var(--muted);
+}
+
+.hl-arrow{
+    position:absolute;
+    top:72px;
+    z-index:2;
+    width:34px;
+    height:34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:#ffffff;
+    color:var(--purple);
+    font-size:20px;
+    line-height:1;
+    cursor:pointer;
+    box-shadow:0 6px 16px rgba(109,63,242,.18);
+    transition:.2s;
+}
+
+.hl-arrow:hover{
+    background:var(--purple);
+    border-color:var(--purple);
+    color:#ffffff;
+}
+
+.hl-arrow.prev{ left:-12px; }
+.hl-arrow.next{ right:-12px; }
+
+.hl-hint{
+    margin-top:4px;
+    text-align:center;
+    font-size:11.5px;
+    color:var(--muted);
+}
+
+.link{
+
+    text-decoration:none;
+
+    color:var(--purple);
+
+    font-size:12px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    background:none;
+
+    border:none;
+
+}
+
+/* ================= Right Sidebar ================= */
+
+aside{
+    padding:22px 22px 22px 0;
+}
+
+.profile{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.avatar{
+    width:40px;
+    height:40px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#6d3ff2,#4c2f9e);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    font-size:14px;
+    box-shadow:0 6px 15px rgba(109,63,242,.25);
+}
+
+.profile .who{
+    text-align:right;
+}
+
+.profile .who .n{
+    font-size:14px;
+    font-weight:600;
+    color:var(--text);
+}
+
+.profile .who .r{
+    font-size:11px;
+    color:var(--teal);
+}
+
+.rail-title{
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:12px;
+    font-weight:600;
+}
+
+/* ================= Quick Actions ================= */
+
+.quick-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.qbtn{
+    background:#ffffff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 10px;
+    text-align:center;
+    cursor:pointer;
+    transition:.25s;
+    box-shadow:0 5px 15px rgba(109,63,242,.05);
+}
+
+.qbtn:hover{
+    transform:translateY(-3px);
+    border-color:var(--purple);
+    box-shadow:0 12px 25px rgba(109,63,242,.15);
+}
+
+.qbtn .qi{
+    display:block;
+    font-size:18px;
+    margin-bottom:8px;
+    color:var(--purple);
+}
+
+.qbtn{
+    font-size:13px;
+    font-weight:600;
+    color:var(--text);
+}
+
+.qbtn.wide{
+    position:relative;
+    overflow:hidden;
+    grid-column:1/3;
+    background:linear-gradient(135deg,#6d3ff2,#4c2f9e);
+    color:#fff;
+    border:none;
+}
+
+.qbtn.wide::after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-150%;
+    width:60%;
+    height:100%;
+    background:linear-gradient(120deg, transparent, rgba(255,255,255,.3), transparent);
+    transform:skewX(-20deg);
+    animation:qbtnShimmer 3.8s ease-in-out infinite;
+}
+
+@keyframes qbtnShimmer{
+    0%{ left:-150%; }
+    60%,100%{ left:150%; }
+}
+
+.qbtn.wide .qi{
+    color:#fff;
+}
+
+/* ================= Activity ================= */
+
+.activity-item{
+    padding:14px 0;
+    border-bottom:1px solid var(--line);
+}
+
+.activity-item:last-child{
+    border-bottom:none;
+}
+
+.activity-tag{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:.05em;
+    margin-bottom:8px;
+}
+
+.tag-match{
+    background:rgba(109,63,242,.12);
+    color:var(--purple);
+}
+
+.tag-report{
+    background:rgba(245,165,36,.15);
+    color:var(--amber);
+}
+
+.tag-returned{
+    background:rgba(34,197,94,.15);
+    color:var(--teal);
+}
+
+.activity-item h4{
+    margin:0 0 6px;
+    font-size:14px;
+    color:var(--text);
+}
+
+.activity-item p{
+    margin:0 0 8px;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.5;
+}
+
+.activity-item .when{
+    font-size:11px;
+    color:var(--muted);
+}
+
+.activity-item a.review{
+    text-decoration:none;
+    color:var(--purple);
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.activity-item a.review:hover{
+    text-decoration:underline;
+}
+
+.empty{
+    text-align:center;
+    padding:25px 0;
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* ================= Toast ================= */
+
+.toast{
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    background:var(--text);
+    color:#fff;
+    padding:12px 18px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:600;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+    z-index:999;
+    opacity:0;
+    transform:translateY(10px);
+    pointer-events:none;
+    transition:opacity .25s, transform .25s;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+/* ================= Modal ================= */
+
+.modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(13,10,31,.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:998;
+}
+
+.modal{
+    background:#fff;
+    border-radius:var(--radius);
+    padding:24px;
+    width:360px;
+    max-width:90vw;
+    box-shadow:0 25px 60px rgba(0,0,0,.25);
+}
+
+.modal h3{
+    margin:0 0 6px;
+    font-size:16px;
+}
+
+.modal p{
+    margin:0 0 16px;
+    font-size:12.5px;
+    color:var(--muted);
+}
+
+.modal label{
+    display:block;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--muted);
+    margin:12px 0 6px;
+}
+
+.modal input,
+.modal textarea{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-family:inherit;
+    font-size:13px;
+    outline:none;
+}
+
+.modal textarea{
+    resize:vertical;
+    min-height:60px;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:18px;
+}
+
+.modal-actions button{
+    border:none;
+    border-radius:8px;
+    padding:9px 16px;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.modal-actions .cancel{
+    background:var(--panel-2);
+    color:var(--muted);
+}
+
+.modal-actions .submit{
+    background:linear-gradient(135deg,#6d3ff2,#4c2f9e);
+    color:#fff;
+}
+
+/* ================= Scrollbar ================= */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-track{
+    background:#f4f2fb;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#cdbcfb;
+    border-radius:10px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#8b5cf6;
+}
+
+/* ================= Responsive ================= */
+
+@media (max-width:1200px){
+
+    .shell{
+        grid-template-columns:220px 1fr;
+    }
+
+    aside{
+        display:none;
+    }
+
+}
+
+@media (max-width:900px){
+
+    .shell{
+        grid-template-columns:1fr;
+    }
+
+    .sidebar{
+        display:none;
+    }
+
+    main{
+        padding:18px;
+    }
+
+    .stat-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+}
+
+@media (max-width:600px){
+
+    .stat-grid{
+        grid-template-columns:1fr;
+    }
+
+    .quick-grid{
+        grid-template-columns:1fr;
+    }
+
+    .qbtn.wide{
+        grid-column:1;
+    }
+
+    .panel{
+        padding:16px;
+    }
+
+    .hl-card{
+        flex-basis:200px;
+    }
+
+    .hl-photo{
+        height:130px;
+    }
+
+    .hl-arrow{
+        display:none;
+    }
+
+    .profile{
+        justify-content:flex-start;
+    }
+
+}
+
+/* ================================================================
+   ANIMATION — rippleClick directive
+   ================================================================ */
+
+@keyframes ripple-anim{
+    to{
+        transform:scale(1);
+        opacity:0;
+    }
+}
+
+.ripple-el{
+    position:absolute;
+    border-radius:50%;
+    transform:scale(0);
+    opacity:.9;
+    animation:ripple-anim .6s ease-out;
+    pointer-events:none;
+}
+
+/* ================================================================
+   ANIMATION — ngAnimate hooks for ng-repeat
+   (nav items, stat cards, highlight cards, quick actions, activity feed)
+   ================================================================ */
+
+nav.navlist a.ng-enter{
+    transition:opacity .35s ease, transform .35s ease;
+    opacity:0;
+    transform:translateX(-8px);
+}
+nav.navlist a.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateX(0);
+}
+
+.stat-card.ng-enter{
+    transition:opacity .45s ease, transform .45s ease;
+    opacity:0;
+    transform:translateY(14px);
+}
+.stat-card.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.hl-card.ng-enter{
+    transition:opacity .4s ease, transform .4s ease;
+    opacity:0;
+    transform:translateY(10px);
+}
+.hl-card.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.qbtn.ng-enter{
+    transition:opacity .4s ease, transform .4s ease;
+    opacity:0;
+    transform:translateY(10px);
+}
+.qbtn.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.activity-item.ng-enter{
+    transition:opacity .4s ease, transform .4s ease;
+    opacity:0;
+    transform:translateY(10px);
+}
+.activity-item.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateY(0);
+}
+.activity-item.ng-leave{
+    transition:opacity .25s ease;
+    opacity:1;
+}
+.activity-item.ng-leave.ng-leave-active{
+    opacity:0;
+}
+
+.badge.ng-enter{
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+    transform:scale(0);
+}
+.badge.ng-enter.ng-enter-active{
+    transform:scale(1);
+}
+
+/* ================================================================
+   ANIMATION — ngAnimate hooks for ng-if
+   (report modal, empty activity state)
+   ================================================================ */
+
+.modal-backdrop.ng-enter{
+    transition:opacity .2s ease;
+    opacity:0;
+}
+.modal-backdrop.ng-enter.ng-enter-active{
+    opacity:1;
+}
+.modal-backdrop.ng-leave{
+    transition:opacity .2s ease;
+    opacity:1;
+}
+.modal-backdrop.ng-leave.ng-leave-active{
+    opacity:0;
+}
+
+.modal-backdrop.ng-enter .modal{
+    transition:transform .28s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+    transform:scale(.9) translateY(10px);
+    opacity:0;
+}
+.modal-backdrop.ng-enter.ng-enter-active .modal{
+    transform:scale(1) translateY(0);
+    opacity:1;
+}
+
+.empty.ng-enter{
+    transition:opacity .3s ease;
+    opacity:0;
+}
+.empty.ng-enter.ng-enter-active{
+    opacity:1;
+}
+
+</style>
+</head>
+
+<body ng-controller="DashboardController as vm">
+
+<div class="shell">
+
+  <!-- ================= SIDEBAR ================= -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="dot">◎</div>
+      <div>
+        <span class="name">FoundAI</span>
+        <span class="tag">INTELLIGENT RECOVERY</span>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" ng-model="vm.searchText" placeholder="Search matches, items or locations…">
+    </div>
+
+    <nav class="navlist">
+      <a ng-repeat="item in vm.navItems"
+         ng-class="{active: item.active}"
+         ng-click="vm.selectNav(item)"
+         ripple-click>
+        <span class="ic">{{item.icon}}</span>{{item.label}}
+        <span class="badge" ng-if="item.hasUpdate"></span>
+      </a>
+      <a onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='../login/index.html';})(); return false;">
+        <span class="ic">⏻</span>Logout
+      </a>
+    </nav>
+  </div>
+
+  <!-- ================= MAIN ================= -->
+  <main>
+    <div class="hello">
+      <h1>Hello, {{vm.user.firstName}} 👋</h1>
+      <p>Here's what's happening in your recovery network today.</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card" ng-repeat="s in vm.stats">
+        <div class="stat-top">
+          <span class="stat-label">{{s.label}}</span>
+          <span class="stat-icon">{{s.icon}}</span>
+        </div>
+        <div class="stat-value mono" count-up="s.value"></div>
+        <div class="stat-sub">{{s.delta}}</div>
+      </div>
+
+      <div class="stat-card hero">
+        <div class="stat-top">
+          <span class="stat-label">AI Matches</span>
+          <span class="stat-icon">✦</span>
+        </div>
+        <div class="stat-value mono" count-up="vm.aiMatches.count"></div>
+        <div class="stat-sub">{{vm.aiMatches.count | matchCount}} new matches</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>📸 Highlights</h3>
+        <div class="range-tabs">
+          <button ng-class="{active: vm.highlightRange === 'day'}"  ng-click="vm.setHighlightRange('day')">Today</button>
+          <button ng-class="{active: vm.highlightRange === 'week'}" ng-click="vm.setHighlightRange('week')">This week</button>
+        </div>
+      </div>
+
+      <div class="hl-wrap">
+        <button class="hl-arrow prev" ng-click="vm.carousel.by(-1)" aria-label="Previous highlights">‹</button>
+        <button class="hl-arrow next" ng-click="vm.carousel.by(1)"  aria-label="Next highlights">›</button>
+
+        <div class="hl-track" tabindex="0" drag-scroll="vm.carousel">
+          <div class="hl-card"
+               ng-repeat="h in vm.highlights[vm.highlightRange] | filter:vm.matchesHighlight track by h.id">
+            <div class="hl-photo">
+              <img ng-src="{{h.photo}}" alt="{{h.title}}" draggable="false">
+              <span class="hl-badge" ng-class="h.type">{{h.type}}</span>
+            </div>
+            <div class="hl-body">
+              <h4>{{h.title}}</h4>
+              <div class="hl-meta">
+                <span>{{h.location}}</span>
+                <span>{{h.when | timeAgo}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty" ng-if="vm.highlightsLoading">Loading highlights…</div>
+      <div class="empty" ng-if="!vm.highlightsLoading && vm.highlightsError">
+        Couldn't load reports. Check that the server is running.
+      </div>
+      <div class="empty" ng-if="!vm.highlightsLoading && !vm.highlightsError && vm.highlights[vm.highlightRange].length === 0">
+        No lost or found reports {{vm.highlightRange === 'day' ? 'today' : 'this week'}} yet.
+      </div>
+      <div class="empty" ng-if="!vm.highlightsLoading && !vm.highlightsError && vm.highlights[vm.highlightRange].length > 0 && (vm.highlights[vm.highlightRange] | filter:vm.matchesHighlight).length === 0">
+        No highlights match "{{vm.searchText}}".
+      </div>
+      <div class="hl-hint" ng-if="(vm.highlights[vm.highlightRange] | filter:vm.matchesHighlight).length > 0">
+        Drag the photos sideways or use the arrows to browse.
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= RIGHT RAIL ================= -->
+  <aside>
+    <div class="profile" ng-click="vm.goToProfile()" style="cursor:pointer;">
+      <div class="who">
+        <div class="n">{{vm.user.firstName}} {{vm.user.lastName}}</div>
+        <div class="r">{{vm.user.tier}}</div>
+      </div>
+      <div class="avatar">{{vm.user.initials}}</div>
+    </div>
+
+    <div class="rail-title">Quick Actions</div>
+    <div class="quick-grid">
+      <div class="qbtn" ng-repeat="q in vm.quickActions" ng-click="vm.doQuickAction(q)" ripple-click>
+        <span class="qi">{{q.icon}}</span>{{q.label}}
+      </div>
+      <div class="qbtn wide" ng-click="vm.openVisualSearch()" ripple-click="light">🔍 AI Visual Search</div>
+    </div>
+
+    <div class="rail-title" style="margin-top:22px;display:flex;justify-content:space-between;">
+      <span>Recent Activity</span>
+      <a class="link" ng-click="vm.seeAllActivity()">See all</a>
+    </div>
+
+    <div>
+      <div class="activity-item" ng-repeat="a in vm.recentActivity | filter:vm.searchText">
+        <span class="activity-tag" ng-class="'tag-' + a.type">{{a.type | uppercase}}</span>
+        <h4>{{a.title}}</h4>
+        <p>{{a.detail}}</p>
+        <div class="when">{{a.when | timeAgo}}</div>
+        <a class="review" ng-if="a.type === 'match'" ng-click="vm.reviewMatch(a)">Review match →</a>
+      </div>
+      <div class="empty" ng-if="(vm.recentActivity | filter:vm.searchText).length === 0">
+        No activity matches "{{vm.searchText}}".
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ================= REPORT MODAL ================= -->
+<div class="modal-backdrop" ng-if="vm.modal.open" ng-click="vm.closeModal($event)">
+  <div class="modal" ng-click="$event.stopPropagation()" autofocus-on-open="vm.modal.open">
+    <h3>{{vm.modal.title}}</h3>
+    <p>{{vm.modal.subtitle}}</p>
+
+    <label>Item name</label>
+    <input type="text" ng-model="vm.modal.form.name" placeholder="e.g. Silver keys">
+
+    <label>Location</label>
+    <input type="text" ng-model="vm.modal.form.location" placeholder="e.g. Central Library">
+
+    <label>Description</label>
+    <textarea ng-model="vm.modal.form.description" placeholder="Add any identifying details…"></textarea>
+
+    <div class="modal-actions">
+      <button class="cancel" ng-click="vm.closeModal()" ripple-click>Cancel</button>
+      <button class="submit" ng-click="vm.submitModal()" ripple-click="light">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TOAST ================= -->
+<div class="toast" ng-class="{show: vm.toast.visible}">{{vm.toast.message}}</div>
+
+<script>
+angular.module('foundAI', ['ngAnimate'])
+
+// ---------------------------------------------------------------
+// SERVICE — encapsulates data access, injected into the controller
+// ---------------------------------------------------------------
+.service('RecoveryDataService', function() {
+
+  this.getStats = function() {
+    return [
+      { label: 'Lost Reports',       value: 12,  change: 2, delta: '+2 today',  icon: '📄' },
+      { label: 'Found Reports',      value: 48,  change: 5, delta: '+5 today',  icon: '📦' },
+      { label: 'Successful Returns', value: 124, delta: '92% rate',  icon: '🏅' }
+    ];
+  };
+
+  this.getAiMatches = function() {
+    return { count: 9 };
+  };
+
+  this.getNavItems = function() {
+    return [
+      { label: 'Dashboard',       icon: '▦', active: true },
+      { label: 'Report Lost',     icon: '⚑' },
+      { label: 'Report Found',    icon: '🏷️' },
+      { label: 'My Profile',      icon: '📁' },
+      { label: 'AI Search',       icon: '✦' },
+      { label: 'AR Navigation',   icon: '🧭' },
+      { label: 'AI Lost Heatmap', icon: '🔥' },
+      { label: 'Reward Escrow',   icon: '🛡' },
+      { label: 'Messages',        icon: '✉', hasUpdate: true },
+      { label: 'Notifications',   icon: '🔔' },
+      { label: 'Claims History',  icon: '📜' },
+      { label: 'Admin Mod',       icon: '⚙' }
+    ];
+  };
+
+  this.getQuickActions = function() {
+    return [
+      { label: 'Report Lost',  icon: '🚩', type: 'lost' },
+      { label: 'Report Found', icon: '✅', type: 'found' }
+    ];
+  };
+
+  // Highlights carousel data now comes ONLY from MongoDB (GET /api/items).
+  // No fake/demo cards. The controller calls buildHighlights() with the
+  // items returned by the backend.
+  this.getHighlights = function() {
+    return { day: [], week: [] };
+  };
+
+  // Placeholder picture used when an item has no uploaded photo
+  function scene(emoji, from, to) {
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280">' +
+        '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+          '<stop offset="0" stop-color="' + from + '"/>' +
+          '<stop offset="1" stop-color="' + to + '"/>' +
+        '</linearGradient></defs>' +
+        '<rect width="400" height="280" fill="url(#g)"/>' +
+        '<circle cx="330" cy="40" r="95" fill="#fff" opacity=".12"/>' +
+        '<circle cx="50" cy="255" r="115" fill="#fff" opacity=".10"/>' +
+        '<text x="200" y="182" font-size="120" text-anchor="middle" ' +
+          'font-family="Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,sans-serif">' + emoji + '</text>' +
+      '</svg>';
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+
+  var API_ORIGIN = 'http://localhost:5000/';
+
+  function photoFor(item) {
+    var img = item.image || item.imageUrl || item.photo || item.imagePath;
+    if (img) {
+      return /^(https?:|data:)/i.test(img) ? img : API_ORIGIN + String(img).replace(/^\/+/, '');
+    }
+    return item.type === 'found'
+      ? scene('📦', '#22c55e', '#0f766e')
+      : scene('🔎', '#f5a524', '#c2410c');
+  }
+
+  // Turns raw Mongo items into { day: [...], week: [...] } highlight cards.
+  // Only real reports with type 'lost' or 'found' are kept.
+  this.buildHighlights = function(items) {
+    var now = Date.now();
+    var DAY = 24 * 60 * 60 * 1000;
+
+    var cards = (items || [])
+      .filter(function(it) { return it && (it.type === 'lost' || it.type === 'found'); })
+      .map(function(it) {
+        var when = it.date || it.createdAt || it.updatedAt;
+        return {
+          id:       it._id || it.id,
+          type:     it.type,
+          title:    it.itemName + (it.type === 'found' ? ' found' : ' reported lost'),
+          location: it.location || 'Unknown location',
+          when:     when ? new Date(when) : null,
+          photo:    photoFor(it)
+        };
+      })
+      .filter(function(c) { return c.when && !isNaN(c.when.getTime()); })
+      .sort(function(a, b) { return b.when - a.when; });
+
+    return {
+      day:  cards.filter(function(c) { return now - c.when.getTime() <= DAY; }),
+      week: cards.filter(function(c) { return now - c.when.getTime() <= 7 * DAY; })
+    };
+  };
+
+  this.getRecentActivity = function(userName) {
+    return [
+      { type: 'match',    title: 'Potential match for "Silver Keys"',
+        detail: 'A generic keys description was registered today at Central Quad.',
+        when: new Date(Date.now() - 2 * 60 * 1000) },
+      { type: 'report',   title: 'Wallet reported nearby',
+        detail: 'Brown leather designer wallet lost near Science Wing B. Owner: "Sarah L."',
+        when: new Date(Date.now() - 60 * 60 * 1000) },
+      { type: 'returned', title: userName + ' helped Jason recover his camera',
+        detail: 'Successful verification. ' + userName + ' earned +50 Karma Points.',
+        when: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    ];
+  };
+})
+
+// ---------------------------------------------------------------
+// CUSTOM FILTERS
+// ---------------------------------------------------------------
+
+// Turns an AI-match count into a friendly phrase
+.filter('matchCount', function() {
+  return function(n) {
+    return n === 1 ? '1 new match' : n + ' new matches';
+  };
+})
+
+// Relative "time ago" formatting for the activity feed
+.filter('timeAgo', function() {
+  return function(date) {
+    if (!date) { return ''; }
+    var seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+    if (seconds < 60)   { return 'Just now'; }
+    var minutes = Math.floor(seconds / 60);
+    if (minutes < 60)   { return minutes + 'm ago'; }
+    var hours = Math.floor(minutes / 60);
+    if (hours < 24)     { return hours + 'h ago'; }
+    var days = Math.floor(hours / 24);
+    return days + 'd ago';
+  };
+})
+
+// ---------------------------------------------------------------
+// DIRECTIVES
+// ---------------------------------------------------------------
+
+// countUp: animates a bound number counting up from its previous value
+// to its new one. Runs once on load, and re-runs automatically whenever
+// the bound value changes (e.g. a stat incrementing after a report is
+// submitted), via $watch.
+// Usage: <div count-up="s.value"></div>
+.directive('countUp', function () {
+  return {
+    restrict: 'A',
+    scope: { countUp: '<' },
+    link: function (scope, element) {
+      var duration = 900;
+      var frame = null;
+
+      function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+      function animate(from, to) {
+        var startTime = null;
+        if (frame) { cancelAnimationFrame(frame); }
+
+        function step(timestamp) {
+          if (!startTime) { startTime = timestamp; }
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var current = Math.round(from + (to - from) * easeOutCubic(progress));
+          element.text(current);
+          if (progress < 1) {
+            frame = requestAnimationFrame(step);
+          } else {
+            element.text(to);
+          }
+        }
+
+        frame = requestAnimationFrame(step);
+      }
+
+      element.text(0);
+
+      scope.$watch('countUp', function (newVal, oldVal) {
+        if (angular.isUndefined(newVal)) { return; }
+        animate(newVal === oldVal ? 0 : oldVal, newVal);
+      });
+
+      scope.$on('$destroy', function () {
+        if (frame) { cancelAnimationFrame(frame); }
+      });
+    }
+  };
+})
+
+// dragScroll: lets a horizontally scrolling strip be dragged with the
+// mouse (touch screens already scroll it natively) and gives the parent
+// a tiny API so arrow buttons can move it.
+// Usage: <div class="hl-track" drag-scroll="vm.carousel">...</div>
+//        <button ng-click="vm.carousel.by(1)">›</button>
+.directive('dragScroll', function () {
+  return {
+    restrict: 'A',
+    scope: { dragScroll: '=' },
+    link: function (scope, element) {
+      var track = element[0];
+      var dragging = false;
+      var startX = 0;
+      var startScroll = 0;
+
+      function behavior() {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        return reduce ? 'auto' : 'smooth';
+      }
+
+      function onDown(e) {
+        if (e.pointerType !== 'mouse' || e.button !== 0) { return; }
+        dragging = true;
+        startX = e.clientX;
+        startScroll = track.scrollLeft;
+        element.addClass('dragging');
+        track.setPointerCapture(e.pointerId);
+      }
+
+      function onMove(e) {
+        if (!dragging) { return; }
+        track.scrollLeft = startScroll - (e.clientX - startX);
+      }
+
+      function onUp(e) {
+        if (!dragging) { return; }
+        dragging = false;
+        element.removeClass('dragging');
+        if (track.hasPointerCapture(e.pointerId)) {
+          track.releasePointerCapture(e.pointerId);
+        }
+      }
+
+      element.on('pointerdown', onDown);
+      element.on('pointermove', onMove);
+      element.on('pointerup', onUp);
+      element.on('pointercancel', onUp);
+
+      var api = scope.dragScroll || (scope.dragScroll = {});
+      api.by = function (direction) {
+        track.scrollBy({ left: direction * track.clientWidth * 0.8, behavior: behavior() });
+      };
+      api.reset = function () {
+        track.scrollTo({ left: 0, behavior: behavior() });
+      };
+
+      scope.$on('$destroy', function () {
+        element.off('pointerdown', onDown);
+        element.off('pointermove', onMove);
+        element.off('pointerup', onUp);
+        element.off('pointercancel', onUp);
+      });
+    }
+  };
+})
+
+// rippleClick: a small material-style click ripple for buttons and
+// nav rows. Pass "light" for a white ripple on dark/purple backgrounds;
+// anything else (or omitted) gives a tinted purple ripple for light
+// backgrounds.
+// Usage: <button ripple-click="light">...</button>
+.directive('rippleClick', function () {
+  return {
+    restrict: 'A',
+    scope: { rippleClick: '@' },
+    link: function (scope, element) {
+      var color = scope.rippleClick === 'light' ? 'rgba(255,255,255,.55)' : 'rgba(109,63,242,.25)';
+
+      if (window.getComputedStyle(element[0]).position === 'static') {
+        element.css('position', 'relative');
+      }
+      element.css('overflow', 'hidden');
+
+      function onClick(e) {
+        var rect = element[0].getBoundingClientRect();
+        var size = Math.max(rect.width, rect.height) * 1.4;
+        var ripple = document.createElement('span');
+
+        ripple.className = 'ripple-el';
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        ripple.style.background = color;
+
+        element[0].appendChild(ripple);
+        ripple.addEventListener('animationend', function () {
+          if (ripple.parentNode) { ripple.parentNode.removeChild(ripple); }
+        });
+      }
+
+      element.on('click', onClick);
+
+      scope.$on('$destroy', function () {
+        element.off('click', onClick);
+      });
+    }
+  };
+})
+
+// autofocusOnOpen: focuses the first input/textarea inside the element
+// as soon as the bound expression becomes truthy. Used on the report
+// modal so the "Item name" field is ready to type in the instant it opens.
+// Usage: <div class="modal" autofocus-on-open="vm.modal.open">...</div>
+.directive('autofocusOnOpen', ['$timeout', function ($timeout) {
+  return {
+    restrict: 'A',
+    scope: { autofocusOnOpen: '=' },
+    link: function (scope, element) {
+      scope.$watch('autofocusOnOpen', function (isOpen) {
+        if (!isOpen) { return; }
+        $timeout(function () {
+          var field = element[0].querySelector('input, textarea');
+          if (field) { field.focus(); }
+        }, 50);
+      });
+    }
+  };
+}])
+
+// ---------------------------------------------------------------
+// CONTROLLER — dependencies injected explicitly (DI array syntax
+// keeps names safe under minification)
+// ---------------------------------------------------------------
+.controller('DashboardController', ['RecoveryDataService', '$filter', '$timeout', '$http',
+  function(RecoveryDataService, $filter, $timeout, $http) {
+    var vm = this;
+
+    // -----------------------------------------------------------
+    // Backend endpoints
+    // -----------------------------------------------------------
+    var API_ITEMS         = 'http://localhost:5000/api/items';
+    var API_NOTIFICATIONS = 'http://localhost:5000/api/notifications';
+
+    // -----------------------------------------------------------
+    // Read the logged-in user saved by login/index.html so we can
+    // attach a real MongoDB _id to anything we create (items,
+    // notifications) instead of using the old hardcoded mock user.
+    // -----------------------------------------------------------
+    var loggedUser = null;
+    try {
+      var rawUser = localStorage.getItem('logged_in');
+      if (rawUser) { loggedUser = JSON.parse(rawUser); }
+    } catch (e) {
+      loggedUser = null;
+    }
+
+    vm.searchText = '';
+
+    // Display name of the account that logged in (registered via signup).
+    // Tries the fields the backend may return; falls back to the email
+    // prefix. The old hardcoded mock user is never shown.
+    var displayName = '';
+    if (loggedUser) {
+      displayName = (loggedUser.fullName || loggedUser.name || loggedUser.username || '').trim();
+      if (!displayName && loggedUser.email) {
+        displayName = String(loggedUser.email).split('@')[0];
+      }
+    }
+    if (!displayName) { displayName = 'User'; }
+
+    vm.user = {
+      firstName: displayName.split(/\s+/)[0],
+      lastName: displayName.split(/\s+/).slice(1).join(' '),
+      initials: displayName
+        .split(/\s+/)
+        .map(function(n) { return n.charAt(0); })
+        .join('')
+        .substring(0, 2)
+        .toUpperCase(),
+      tier: (loggedUser && loggedUser.organization) || 'Member'
+    };
+
+    vm.stats          = RecoveryDataService.getStats();
+    vm.aiMatches      = RecoveryDataService.getAiMatches();
+    vm.navItems       = RecoveryDataService.getNavItems();
+    vm.quickActions   = RecoveryDataService.getQuickActions();
+    vm.recentActivity = RecoveryDataService.getRecentActivity(vm.user.firstName);
+    vm.highlights     = RecoveryDataService.getHighlights();   // starts empty
+    vm.highlightsLoading = true;
+    vm.highlightsError   = false;
+    vm.highlightRange = 'day';       // 'day' or 'week'
+    vm.carousel       = {};          // filled in by the dragScroll directive
+
+    vm.formattedReturnRate = $filter('matchCount')(vm.aiMatches.count);
+
+    // -----------------------------------------------------------
+    // Stat helper: moves a stat card's number by `amount` (never below
+    // zero) and keeps its "+N today" line in step with the change.
+    // -----------------------------------------------------------
+    function adjustStat(stat, amount) {
+      var next = Math.max(0, stat.value + amount);
+      stat.change += next - stat.value;
+      stat.value = next;
+      stat.delta = (stat.change < 0 ? '-' : '+') + Math.abs(stat.change) + ' today';
+    }
+
+    // -----------------------------------------------------------
+    // Toast helper
+    // -----------------------------------------------------------
+    var toastTimer = null;
+    vm.toast = { visible: false, message: '' };
+
+    vm.showToast = function(message) {
+      vm.toast.message = message;
+      vm.toast.visible = true;
+      if (toastTimer) { $timeout.cancel(toastTimer); }
+      toastTimer = $timeout(function() {
+        vm.toast.visible = false;
+      }, 2600);
+    };
+
+    // -----------------------------------------------------------
+    // Modal helper (used by Report Lost / Report Found)
+    // -----------------------------------------------------------
+    vm.modal = { open: false, title: '', subtitle: '', form: {}, type: null };
+
+    vm.openModal = function(type) {
+      vm.modal.open = true;
+      vm.modal.type = type;
+      vm.modal.form = { name: '', location: '', description: '' };
+      vm.modal.title = type === 'found' ? 'Report a Found Item' : 'Report a Lost Item';
+      vm.modal.subtitle = type === 'found'
+        ? 'Help reunite this item with its owner. Our AI will start matching right away.'
+        : 'Tell us what you lost so our AI can start scanning nearby found reports.';
+    };
+
+    vm.closeModal = function($event) {
+      if ($event) { $event.stopPropagation(); }
+      vm.modal.open = false;
+    };
+
+    vm.submitModal = function() {
+      if (!vm.modal.form.name) {
+        vm.showToast('Please enter an item name.');
+        return;
+      }
+
+      if (!loggedUser || !loggedUser.id) {
+        vm.showToast('Please log in again before submitting a report.');
+        return;
+      }
+
+      var payload = {
+        itemName:    vm.modal.form.name,
+        description: vm.modal.form.description,
+        location:    vm.modal.form.location,
+        type:        vm.modal.type,     // 'lost' or 'found' — matches Item schema enum
+        reportedBy:  loggedUser.id,     // real Mongo _id, not mock data
+        status:      'active',
+        date:        new Date()
+      };
+
+      // Save the item to MongoDB (this was previously never sent to the backend)
+      $http.post(API_ITEMS, payload).then(function(response) {
+
+        // Lost report submitted  -> Lost Reports goes up by 1.
+        // Found report submitted -> Found Reports goes down by 1.
+        if (vm.modal.type === 'found') {
+          adjustStat(vm.stats[1], -1);
+        } else {
+          adjustStat(vm.stats[0], 1);
+        }
+
+        // Also log a notification for this user so the Notifications
+        // page (which only reads, it never writes) has something to show.
+        $http.post(API_NOTIFICATIONS, {
+          userId:  loggedUser.id,
+          message: '"' + vm.modal.form.name + '" was reported as ' + vm.modal.type + '.',
+          type:    vm.modal.type === 'found' ? 'success' : 'info'
+        });
+
+        vm.showToast('"' + vm.modal.form.name + '" submitted successfully.');
+        vm.modal.open = false;
+        vm.loadHighlights();   // new report shows up in Highlights right away
+
+      }).catch(function(error) {
+        console.error('Item report failed:', error);
+        vm.showToast('Failed to submit report. Please try again.');
+      });
+    };
+
+    // -----------------------------------------------------------
+    // Sidebar navigation
+    // -----------------------------------------------------------
+ vm.selectNav = function(item) {
+  vm.navItems.forEach(function(n) { n.active = false; });
+  item.active = true;
+  if (item.hasUpdate) { item.hasUpdate = false; }
+
+  if (item.label === 'Report Lost') {
+    window.location.href = '../reportlost/reportlost.html';
+    return;
+  }
+  if (item.label === 'Report Found') {
+    window.location.href = '../reportfound/reportfound.html';
+    return;
+  }
+  if (item.label === 'My Profile') {
+    window.location.href = '../profile/profile.html';
+    return;
+  }
+  if (item.label === 'Notifications') {
+    window.location.href = '../notifi/notifi.html';
+    return;
+  }
+  if (item.label === 'Messages') {
+    window.location.href = '../messages/messages.html';
+    return;
+  }
+  if(item.label==='Admin Mod'){
+    window.location.href='../admin/admin-mod.html';
+    return;
+  }
+  if(item.label==='Claims History'){
+    window.location.href='../admin/claims-history.html';
+    return;
+  }
+  if(item.label==='Reward Escrow'){
+    window.location.href='../admin/reward-escrow.html';
+    return;
+  }
+  if(item.label==='AR Navigation'){
+    window.location.href='../arnavigation.html';
+    return;
+  }
+  if(item.label==='AI Lost Heatmap'){
+    window.location.href='../heatmap.html';
+    return;
+  }
+  
+  vm.showToast('Switched to ' + item.label);
+};
+
+
+    // -----------------------------------------------------------
+    // Quick actions (Report Lost / Report Found)
+    // -----------------------------------------------------------
+    vm.goToProfile = function() {
+      window.location.href = '../profile/profile.html';
+    };
+
+    vm.doQuickAction = function(action) {
+      vm.openModal(action.type);
+    };
+
+    vm.openVisualSearch = function() {
+      vm.showToast('Opening AI Visual Search…');
+    };
+
+    // -----------------------------------------------------------
+    // Highlights panel
+    // -----------------------------------------------------------
+    // Load real lost/found reports from MongoDB and build the cards
+    vm.loadHighlights = function() {
+      vm.highlightsLoading = true;
+      vm.highlightsError = false;
+      $http.get(API_ITEMS).then(function(response) {
+        var data  = response.data;
+        var items = Array.isArray(data) ? data : (data && (data.items || data.data)) || [];
+        vm.highlights = RecoveryDataService.buildHighlights(items);
+      }).catch(function(error) {
+        console.error('Could not load highlights:', error);
+        vm.highlights = RecoveryDataService.getHighlights();
+        vm.highlightsError = true;
+      }).finally(function() {
+        vm.highlightsLoading = false;
+      });
+    };
+
+    vm.setHighlightRange = function(range) {
+      if (vm.highlightRange === range) { return; }
+      vm.highlightRange = range;
+      // wait for the new cards to render, then slide back to the start
+      $timeout(function() {
+        if (vm.carousel.reset) { vm.carousel.reset(); }
+      });
+    };
+
+    vm.loadHighlights();
+
+    // Search box filters highlights by title, location and type only
+    // (never by the photo URL, which would match almost anything).
+    vm.matchesHighlight = function(h) {
+      var q = (vm.searchText || '').toLowerCase();
+      if (!q) { return true; }
+      return (h.title + ' ' + h.location + ' ' + h.type).toLowerCase().indexOf(q) !== -1;
+    };
+
+    // -----------------------------------------------------------
+    // Activity rail
+    // -----------------------------------------------------------
+    vm.seeAllActivity = function() {
+      vm.showToast('Loading full activity history…');
+    };
+
+    vm.reviewMatch = function(activity) {
+      vm.showToast('Opening match review: ' + activity.title);
+    };
+  }
+]);
+
+</script>
+
+</body>
+</html>

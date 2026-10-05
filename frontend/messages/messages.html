@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html ng-app="MessageApp">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoundAI - Messages</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------------- SIDEBAR (matching FoundAI dashboard) ---------------- */
+  .sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-right: 1px solid #eceef5;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-left: 4px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: #5c34e8;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(92,52,232,0.25);
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+  }
+
+  .logo-subtitle {
+    font-size: 9px;
+    font-weight: 700;
+    color: #838ca0;
+    letter-spacing: 0.9px;
+    margin-top: 3px;
+  }
+
+  .sidebar-search {
+    margin-bottom: 20px;
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 13.5px;
+    background: #f2eefd;
+    outline: none;
+    color: #4b5563;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .sidebar-search input::placeholder {
+    color: #594e77;
+    opacity: 0.9;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #4b5563;
+    font-size: 14.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 2px;
+  }
+
+  .nav-item:hover {
+    background: #f8fafc;
+    color: #1f2937;
+  }
+
+  .nav-item.active {
+    background: #f2eefd;
+    color: #6c3ce9;
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    background: #6c3ce9;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .nav-icon {
+    font-size: 17px;
+    width: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .nav-dot {
+    width: 7px;
+    height: 7px;
+    background: #6c3ce9;
+    border-radius: 50%;
+    margin-left: auto;
+  }
+
+  .nav-count {
+    margin-left: auto;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 10px;
+    padding: 1px 8px;
+    min-width: 20px;
+    text-align: center;
+  }
+
+  /* ---------------- MAIN CONTENT AREA ---------------- */
+  .main-content {
+    flex: 1;
+    padding: 24px 30px;
+    overflow-y: auto;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: auto;
+    display: flex;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+    height: 680px;
+  }
+
+  .inbox-list {
+    width: 340px;
+    border-right: 1px solid #eee;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .inbox-list h3 { margin-top: 0; color: #1e1b4b; }
+
+  /* ---------------- PEOPLE (everyone with an account) ---------------- */
+  .people { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #eee; }
+  .people h3 { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font-size: 14px; }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #2ecc71; display: inline-block; animation: liveDotPulse 1.6s infinite; }
+  @keyframes liveDotPulse {
+    0% { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(46,204,113,0); }
+    100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+  }
+  .online-empty { font-size: 12px; color: #94a3b8; }
+  .people h3 .count-pill {
+    background: #f2eefe; color: #6c3ce9; font-size: 11px; font-weight: 700;
+    border-radius: 10px; padding: 1px 7px; margin-left: auto;
+  }
+  .people-sub { margin: 0 0 10px; font-size: 11.5px; color: #94a3b8; }
+
+  .person {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 8px; border-radius: 10px; cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .person:hover { background: #f7f5ff; }
+  .person.active { background: #f2eefe; }
+  .person img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .person-info { flex: 1; min-width: 0; }
+  .person-info .pname { font-size: 13.5px; font-weight: 600; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .person-info .porg { font-size: 11px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .status-dot.on { background: #2ecc71; box-shadow: 0 0 0 3px rgba(46,204,113,0.18); }
+  .status-dot.off { background: #cbd5e1; }
+  .person-chat-btn {
+    border: 1px solid #e6e0ff; background: #fff; color: #6c3ce9;
+    font-size: 10.5px; font-weight: 700; border-radius: 8px;
+    padding: 4px 7px; cursor: pointer; opacity: 0; transition: opacity .15s;
+  }
+  .person:hover .person-chat-btn { opacity: 1; }
+
+  .presence-legend { font-size: 10.5px; color: #94a3b8; margin-top: 8px; }
+
+  .search-box { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; font-size: 13px; }
+  .search-box:focus { outline: none; border-color: #6c3ce9; }
+
+  .conversation {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .conversation.active { background: #f2eefe; }
+  .conversation img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+  .conv-meta { flex: 1; min-width: 0; }
+  .conv-meta .name { font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-meta .preview { font-size: 12px; color: #888; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-meta .preview.highlight { color: #6c3ce9; font-weight: bold; }
+  .conv-meta .preview.mine { color: #6c3ce9; }
+  .conv-time { font-size: 11px; color: #aaa; white-space: nowrap; }
+  .conv-remove { position: absolute; right: 6px; top: 6px; background: none; border: none; color: #e74c3c; cursor: pointer; font-size: 12px; display: none; }
+  .conv-remove { display: none; }
+  .conversation:hover .conv-remove { display: block; }
+  .unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c3ce9; display: inline-block; margin-right: 4px; }
+  .unread-count {
+    background: #6c3ce9; color: #fff; font-size: 10px; font-weight: 700;
+    border-radius: 10px; padding: 1px 6px; margin-left: 5px;
+  }
+
+  .chat-panel { flex: 1; display: flex; flex-direction: column; background: #fafafa; }
+  .chat-header { padding: 16px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 12px; background: #fff; }
+  .chat-header img { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; }
+  .chat-header .who { font-weight: 700; color: #1f2937; }
+  .status-online { color: #2ecc71; font-size: 12px; font-weight: 500; }
+  .status-offline { color: #94a3b8; font-size: 12px; }
+  .offline-note {
+    font-size: 11px; color: #8a7fb0; background: #f2eefe;
+    border-radius: 8px; padding: 6px 16px;
+  }
+
+  .chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+  .msg-row { display: flex; gap: 8px; max-width: 70%; }
+  .msg-row.self { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-row img { width: 32px; height: 32px; border-radius: 50%; }
+  .bubble { padding: 10px 14px; border-radius: 12px; background: #fff; font-size: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .msg-row.self .bubble { background: #6c3ce9; color: #fff; }
+  .msg-sender { font-size: 10.5px; font-weight: 700; color: #8b7fc7; margin-bottom: 3px; }
+  .timestamp { font-size: 10px; color: #aaa; margin-top: 4px; text-align: right; }
+  .msg-row.self .timestamp { text-align: left; }
+
+  .item-card { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; display: flex; gap: 10px; align-items: center; background: #f8fafc; margin-top: 8px; color: #333; }
+  .item-card .icon { background: #ede9fe; padding: 8px; border-radius: 8px; font-size: 18px; }
+  .item-card .label { font-size: 11px; color: #6c3ce9; font-weight: bold; text-transform: uppercase; }
+  .item-card .score { font-size: 12px; color: #64748b; }
+
+  .verify-card { border: 1px solid #d5f2e3; background: #f4fdf8; border-radius: 10px; padding: 14px; margin-top: 8px; color: #333; }
+  .verify-card .label { font-size: 11px; color: #2ecc71; font-weight: bold; text-transform: uppercase; }
+  .verify-btn { background: #2ecc71; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-top: 8px; font-weight: bold; }
+  .verify-btn[disabled] { background: #aaa; cursor: not-allowed; }
+
+  .chat-input { display: flex; gap: 10px; padding: 14px; border-top: 1px solid #eee; background: #fff; }
+  .chat-input input { flex: 1; padding: 10px 16px; border: 1px solid #ddd; border-radius: 20px; font-size: 14px; }
+  .send-btn { background: #6c3ce9; color: #fff; border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+  .send-btn:hover { background: #5b3df0; }
+  .send-btn[disabled] { background: #b9b0d8; cursor: not-allowed; }
+  .error { color: #e74c3c; font-size: 12px; padding: 0 16px; }
+  .hint { color: #94a3b8; font-size: 11.5px; padding: 0 16px 8px; }
+
+  .empty-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 15px;
+    gap: 10px;
+    text-align: center;
+    padding: 20px;
+  }
+
+  /* ---------------- LOGIN GATE ---------------- */
+  .login-gate {
+    position: fixed; inset: 0; background: rgba(17,24,39,0.55);
+    display: flex; align-items: center; justify-content: center; z-index: 50;
+  }
+  .login-gate .card {
+    background: #fff; border-radius: 14px; padding: 28px 32px; max-width: 380px; text-align: center;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  }
+  .login-gate h2 { margin: 0 0 8px; color: #1e1b4b; font-size: 18px; }
+  .login-gate p { margin: 0 0 18px; color: #6b7280; font-size: 13.5px; }
+  .login-gate a { display: inline-block; background: #6c3ce9; color: #fff; text-decoration: none; padding: 10px 22px; border-radius: 10px; font-weight: 600; font-size: 14px; }
+
+  .spinner { font-size: 12px; color: #94a3b8; padding: 6px 0; }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: scale(0.85) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  @keyframes pulseClick {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(0.93); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes dotBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+  }
+
+  .conversation { transition: background 0.2s ease, transform 0.15s ease; }
+  .conversation:hover { transform: translateX(3px); }
+  .unread-dot { animation: dotBlink 1.6s ease-in-out infinite; }
+  .msg-row .bubble { animation: bubbleIn 0.3s ease; }
+  .send-btn, .verify-btn, .conv-remove { transition: transform 0.15s ease; }
+  .pulse-anim { animation: pulseClick 0.35s ease; }
+  .chat-input input { transition: box-shadow 0.2s ease, border-color 0.2s ease; }
+  .chat-input input:focus { box-shadow: 0 0 0 3px rgba(108,60,233,0.15); border-color: #6c3ce9; outline: none; }
+</style>
+</head>
+<body>
+
+<div class="app-layout" ng-controller="MessagesController as vm">
+
+  <!-- LEFT SIDEBAR (FoundAI Intelligent Recovery) -->
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="4" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="1.5" fill="#ffffff"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-title">FoundAI</span>
+        <span class="logo-subtitle">INTELLIGENT RECOVERY</span>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="sidebar-search">
+      <input type="text" placeholder="Search matches, items or loc">
+    </div>
+
+    <!-- Navigation Items (Reward Escrow, Admin Mod, Claims History EXCLUDED) -->
+    <nav class="sidebar-nav">
+      <!-- 1. Dashboard -->
+      <a href="../dashboard/dashboard.html" class="nav-item">
+        <span class="nav-icon" style="color: #6c3ce9; font-size: 19px;">▦</span>
+        <span>Dashboard</span>
+      </a>
+
+      <!-- 2. Report Lost -->
+      <a href="../reportlost/reportlost.html" class="nav-item">
+        <span class="nav-icon" style="color: #475569; font-size: 18px;">⚑</span>
+        <span>Report Lost</span>
+      </a>
+
+      <!-- 3. Report Found -->
+      <a href="../reportfound/reportfound.html" class="nav-item">
+        <span class="nav-icon" style="font-size: 17px;">🏷️</span>
+        <span>Report Found</span>
+      </a>
+
+      <!-- 4. My Reports -->
+      <a href="../profile/profile.html" class="nav-item">
+        <span class="nav-icon">📁</span>
+        <span>My Profile</span>
+      </a>
+
+      <!-- 5. AI Search -->
+      <a class="nav-item">
+        <span class="nav-icon" style="color: #334155; font-size: 17px;">✦</span>
+        <span>AI Search</span>
+      </a>
+
+      <!-- 6. AR Navigation -->
+      <a href="../arnavigation.html" class="nav-item">
+        <span class="nav-icon">🧭</span>
+        <span>AR Navigation</span>
+      </a>
+
+      <!-- 7. AI Lost Heatmap -->
+      <a href="../heatmap.html" class="nav-item">
+        <span class="nav-icon">🔥</span>
+        <span>AI Lost Heatmap</span>
+      </a>
+
+      <!-- 8. Messages (Active) -->
+      <a class="nav-item active">
+        <span class="nav-icon" style="font-size: 17px;">✉️</span>
+        <span>Messages</span>
+        <span class="nav-count" ng-if="vm.totalUnread > 0">{{ vm.totalUnread }}</span>
+        <span class="nav-dot" ng-if="vm.totalUnread === 0"></span>
+      </a>
+
+      <!-- 9. Notifications -->
+      <a href="../notifi/notifi.html" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        <span>Notifications</span>
+      </a>
+
+      <!-- Logout -->
+      <a href="#" onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='../login/index.html';})(); return false;" class="nav-item">
+        <span class="nav-icon">⏻</span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- MAIN MESSAGES CONTAINER -->
+  <main class="main-content">
+    <div class="container" id="msgApp">
+
+      <!-- PEOPLE + INBOX -->
+      <div class="inbox-list">
+
+        <!-- EVERYONE WITH AN ACCOUNT ON THE SITE -->
+        <div class="people">
+          <h3>
+            <span class="live-dot"></span>
+            People on FoundAI
+            <span class="count-pill">{{ vm.people.length }}</span>
+          </h3>
+          <p class="people-sub">Every registered user. You can message anyone — online or not.</p>
+
+          <input class="search-box" type="text"
+                 placeholder="Search people by name..."
+                 ng-model="vm.peopleSearch">
+
+          <div ng-repeat="p in vm.people | filter:vm.peopleFilter track by p._id"
+               class="person"
+               ng-class="{active: vm.activeConversation && vm.activeConversation.peer && vm.activeConversation.peer._id === p._id}"
+               ng-click="vm.startChat(p)">
+            <img ng-src="{{ p.avatar || vm.avatarFor(p) }}" alt="{{ p.fullName }}">
+            <div class="person-info">
+              <div class="pname">{{ p.fullName }}</div>
+              <div class="porg">{{ p.organization || p.department || p.username }}</div>
+            </div>
+            <span class="status-dot" ng-class="p.online ? 'on' : 'off'"
+                  title="{{ p.online ? 'Online now' : 'Offline — messages are saved for them' }}"></span>
+            <button class="person-chat-btn" pulse-click ng-click="vm.startChat(p); $event.stopPropagation();">
+              {{ p.conversationId ? 'Open' : 'Message' }}
+            </button>
+          </div>
+
+          <div class="online-empty" ng-if="vm.people.length === 0 && !vm.loadingPeople">
+            No other users are registered yet.
+          </div>
+          <div class="spinner" ng-if="vm.loadingPeople">Loading people…</div>
+          <div class="presence-legend">Green = online right now. Grey = offline, but you can still send; they will see it in their inbox.</div>
+        </div>
+
+        <!-- INBOX -->
+        <h3>Inbox Messages <span class="unread-count" ng-if="vm.totalUnread > 0">{{ vm.totalUnread }} new</span></h3>
+        <input class="search-box" type="text" placeholder="Search your inbox..." ng-model="vm.searchTerm">
+
+        <div class="conversation"
+             ng-repeat="c in vm.conversations | filter:vm.searchTerm track by c._id"
+             ng-class="{active: vm.activeConversation && vm.activeConversation._id === c._id}"
+             ng-click="vm.selectConversation(c)">
+          <img ng-src="{{ c.avatar }}" alt="{{ c.name }}">
+          <div class="conv-meta">
+            <div class="name">
+              <span class="unread-dot" ng-if="c.unread"></span>{{ c.name }}
+              <span class="unread-count" ng-if="c.unread">{{ c.unreadCount }}</span>
+            </div>
+            <div class="preview" ng-class="{highlight: c.unread, mine: c.lastMessageIsMine}">{{ c.lastMessage || 'No messages yet' }}</div>
+          </div>
+          <div class="conv-time">{{ c.lastMessageTime | messageTime }}</div>
+          <button class="conv-remove" pulse-click ng-click="vm.deleteConversation(c, $event)">Remove</button>
+        </div>
+
+        <div class="online-empty" ng-if="vm.conversations.length === 0 && !vm.loadingInbox">
+          Your inbox is empty. Pick someone from the list above to start a chat.
+        </div>
+        <div class="spinner" ng-if="vm.loadingInbox">Loading your inbox…</div>
+      </div>
+
+      <!-- CHAT PANEL -->
+      <div class="chat-panel" ng-if="vm.activeConversation">
+        <div class="chat-header">
+          <img ng-src="{{ vm.activeConversation.avatar }}" alt="">
+          <div>
+            <div class="who">{{ vm.activeConversation.name }}</div>
+            <span class="status-online" ng-if="vm.activeConversation.peer.online">&#9679; Online now</span>
+            <span class="status-offline" ng-if="!vm.activeConversation.peer.online">&#9679; Offline</span>
+          </div>
+        </div>
+
+        <div class="offline-note" ng-if="!vm.activeConversation.peer.online">
+          {{ vm.activeConversation.name }} is offline right now — anything you send is saved and
+          will show up in their inbox the next time they open Messages.
+        </div>
+
+        <div class="chat-body" id="chatBody">
+          <div class="msg-row" ng-repeat="m in vm.messages track by $index" ng-class="{self: m.sender === 'me'}">
+            <img ng-if="m.sender !== 'me'" ng-src="{{ vm.activeConversation.avatar }}" alt="">
+            <div>
+              <div class="bubble">
+                <span ng-if="m.text">{{ m.text }}</span>
+
+                <div class="item-card" ng-if="m.itemMatch && m.itemMatch.name">
+                  <div class="icon">&#128241;</div>
+                  <div>
+                    <div class="label">Lost Item Match</div>
+                    <strong>{{ m.itemMatch.name }}</strong><br>
+                    <span class="score">{{ m.itemMatch.location }} &bull; {{ m.itemMatch.matchScore | number }}% Score</span>
+                  </div>
+                </div>
+
+                <div class="verify-card" ng-if="m.verification">
+                  <div class="label">Secure Identity Link</div>
+                  <strong>Verify your claim</strong>
+                  <p>Click below to securely authenticate your ownership credentials via government ID.</p>
+                  <button class="verify-btn"
+                          pulse-click
+                          ng-click="vm.validateIdentity();"
+                          ng-disabled="vm.activeConversation.identityVerified">
+                    {{ vm.activeConversation.identityVerified ? 'Identity Verified' : 'Validate Identity' }}
+                  </button>
+                </div>
+              </div>
+              <div class="timestamp">{{ m.time | date:'h:mm a' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hint">Press Enter to send. Messages are stored in MongoDB.</div>
+        <div class="chat-input">
+          <input type="text"
+                 placeholder="Type a message..."
+                 ng-model="vm.draftMessage"
+                 ng-disabled="vm.sending"
+                 ng-keypress="vm.handleKeyPress($event)">
+          <button class="send-btn" pulse-click ng-click="vm.addMessage();" ng-disabled="vm.sending || !vm.draftMessage.trim()">&#10148;</button>
+        </div>
+        <div class="error" ng-if="vm.errorMessage">Error: {{ vm.errorMessage }}</div>
+      </div>
+
+      <div class="empty-chat" ng-if="!vm.activeConversation">
+        <div style="font-size: 40px;">✉️</div>
+        <div>Pick any registered user on the left to start messaging.</div>
+        <div style="font-size: 12px;">They do not need to be online — messages wait in their inbox.</div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- LOGIN GATE -->
+  <div class="login-gate" ng-if="!vm.currentUserId">
+    <div class="card">
+      <h2>Log in to use Messages</h2>
+      <p>FoundAI Messages is tied to your account so you can talk to every other registered user.</p>
+      <a href="../login/index.html">Go to Login</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+angular.module('MessageApp', [])
+  .controller('MessagesController', MessagesController)
+  .filter('messageTime', messageTimeFilter)
+  .directive('pulseClick', pulseClickDirective);
+
+// ---------------- FILTER ----------------
+function messageTimeFilter() {
+  return function (dateStr) {
+    if (!dateStr) return '';
+    var date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    var now = new Date();
+    var isToday = date.toDateString() === now.toDateString();
+    if (isToday) return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    var yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  };
+}
+
+// ---------------- CONTROLLER (AngularJS -> Express -> MongoDB) ----------------
+MessagesController.$inject = ['$http', '$timeout', '$interval'];
+function MessagesController($http, $timeout, $interval) {
+  var vm = this;
+
+  var API_ROOT = (window.location.port === '5000')
+    ? window.location.origin
+    : 'http://localhost:5000';
+  var API_BASE = API_ROOT + '/api/conversations';
+  var AUTH_BASE = API_ROOT + '/api/auth';
+
+  var POLL_MS = 4000;   // refresh the inbox / thread
+  var PING_MS = 30000;  // keep my "online" flag warm
+
+  vm.conversations = [];
+  vm.activeConversation = null;
+  vm.messages = [];
+  vm.people = [];
+  vm.searchTerm = '';
+  vm.peopleSearch = '';
+  vm.draftMessage = '';
+  vm.errorMessage = '';
+  vm.loadingInbox = false;
+  vm.loadingPeople = false;
+  vm.sending = false;
+  vm.totalUnread = 0;
+
+  // ---- Who am I? --------------------------------------------------
+  // The id comes from the login page (localStorage) or from the ?user=
+  // query string the dashboard link adds.
+  var stored = null;
+  try { stored = JSON.parse(localStorage.getItem('logged_in')); } catch (e) { stored = null; }
+
+  var queryUser = null;
+  var match = window.location.search.match(/[?&]user=([^&]+)/);
+  if (match) { queryUser = decodeURIComponent(match[1]); }
+
+  var currentUserId = (stored && (stored.id || stored._id)) || queryUser || null;
+  vm.currentUserId = currentUserId;
+  vm.currentUserName = (stored && (stored.fullName || stored.username)) || 'You';
+
+  // If we only know the id (dashboard link, cleared storage) but not the
+  // name, grab the profile from the people list once it loads.
+  if (!stored && queryUser) {
+    $http.get(API_BASE + '/people', { params: { userId: queryUser } }).then(function (res) {
+      var everyone = res.data || [];
+      for (var i = 0; i < everyone.length; i++) {
+        if (everyone[i]._id === queryUser) { vm.currentUserName = everyone[i].fullName; }
+      }
+    }).catch(function () {});
+  }
+
+  // Deterministic little avatar per person so the same user always gets the
+  // same face (mirrors the backend helper).
+  vm.avatarFor = function (user) {
+    var seed = (user && (user._id || user.username || user.fullName)) || 'x';
+    var hash = 0;
+    for (var i = 0; i < seed.length; i++) { hash = (hash * 31 + seed.charCodeAt(i)) % 70; }
+    return 'https://i.pravatar.cc/80?img=' + (hash + 1);
+  };
+
+  // Free-text filter for the people list (name, username, org, department).
+  vm.peopleFilter = function (person) {
+    var q = (vm.peopleSearch || '').toLowerCase().trim();
+    if (!q) return true;
+    return (person.fullName + ' ' + (person.username || '') + ' ' +
+            (person.organization || '') + ' ' + (person.department || ''))
+           .toLowerCase().indexOf(q) !== -1;
+  };
+
+  // ---- Helpers ----------------------------------------------------
+  function isNearBottom() {
+    var el = document.getElementById('chatBody');
+    if (!el) return true;
+    return (el.scrollHeight - el.scrollTop - el.clientHeight) < 90;
+  }
+
+  function scrollToBottom() {
+    $timeout(function () {
+      var chatBody = document.getElementById('chatBody');
+      if (chatBody) { chatBody.scrollTop = chatBody.scrollHeight; }
+    }, 50);
+  }
+
+  // Merge a fresh server list into the view without destroying the object we
+  // are currently showing in the chat panel.
+  function mergeConversations(incoming) {
+    var byId = {};
+    vm.conversations.forEach(function (c) { byId[c._id] = c; });
+
+    var next = (incoming || []).map(function (fresh) {
+      var existing = byId[fresh._id];
+      if (!existing) { return fresh; }
+      Object.keys(fresh).forEach(function (key) {
+        if (key === 'messages') return;           // keep local thread state
+        existing[key] = fresh[key];
+      });
+      return existing;
+    });
+
+    next.sort(function (a, b) {
+      return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0);
+    });
+
+    vm.conversations = next;
+    recountUnread();
+  }
+
+  function recountUnread() {
+    var total = 0;
+    vm.conversations.forEach(function (c) { total += (c.unreadCount || 0); });
+    vm.totalUnread = total;
+  }
+
+  function findConversation(id) {
+    for (var i = 0; i < vm.conversations.length; i++) {
+      if (vm.conversations[i]._id === id) return vm.conversations[i];
+    }
+    return null;
+  }
+
+  // ---- INBOX ------------------------------------------------------
+  function loadInbox(silent) {
+    if (!currentUserId) return;
+    if (!silent) vm.loadingInbox = true;
+
+    return $http.get(API_BASE, { params: { userId: currentUserId } })
+      .then(function (res) {
+        mergeConversations(res.data);
+      })
+      .catch(function (err) {
+        console.warn('Error loading inbox:', err);
+      })
+      .finally(function () { vm.loadingInbox = false; });
+  }
+
+  // ---- PEOPLE: every registered account in the database -------------
+  function loadPeople(silent) {
+    if (!currentUserId) return;
+    if (!silent) vm.loadingPeople = true;
+
+    return $http.get(API_BASE + '/people', { params: { userId: currentUserId } })
+      .then(function (res) {
+        vm.people = res.data || [];
+      })
+      .catch(function (err) {
+        console.warn('Could not load people:', err);
+      })
+      .finally(function () { vm.loadingPeople = false; });
+  }
+
+  // ---- PRESENCE (display only — never gates messaging) -------------
+  function pingPresence() {
+    if (!currentUserId) return;
+    $http.post(AUTH_BASE + '/heartbeat', { userId: currentUserId }).catch(function () {});
+  }
+
+  // ---- Open / create a thread with one person ----------------------
+  vm.startChat = function (person) {
+    if (!person || !person._id || !currentUserId) return;
+    if (person._id === currentUserId) {
+      vm.errorMessage = 'You cannot message yourself.';
+      return;
+    }
+
+    vm.errorMessage = '';
+
+    $http.post(API_BASE + '/start', {
+      userId: currentUserId,
+      participantId: person._id
+    }).then(function (res) {
+      upsertConversation(res.data);
+      // remember the thread so the button flips to "Open"
+      person.conversationId = res.data._id;
+      vm.selectConversation(findConversation(res.data._id) || res.data);
+      loadPeople(true);
+    }).catch(function (err) {
+      vm.errorMessage = (err.data && err.data.error) || 'Could not open that conversation.';
+    });
+  };
+
+  // Insert or refresh a single conversation in the inbox list.
+  function upsertConversation(fresh) {
+    if (!fresh) return null;
+    var existing = findConversation(fresh._id);
+
+    if (!existing) {
+      existing = angular.extend({}, fresh);
+      vm.conversations.unshift(existing);
+    } else {
+      Object.keys(fresh).forEach(function (key) {
+        if (key === 'messages') return;
+        existing[key] = fresh[key];
+      });
+    }
+
+    vm.conversations.sort(function (a, b) {
+      return new Date(b.lastMessageTime || 0) - new Date(a.lastMessageTime || 0);
+    });
+    recountUnread();
+    return existing;
+  }
+
+  // ---- Select a conversation & load its messages --------------------
+  vm.selectConversation = function (conversation) {
+    if (!conversation) return;
+
+    vm.activeConversation = conversation;
+    vm.messages = conversation.messages || [];
+    vm.errorMessage = '';
+    vm.lastFetchedAt = null;
+
+    scrollToBottom();
+
+    // Opening a thread marks it read for this user only.
+    if (conversation.unread || conversation.unreadCount > 0) {
+      conversation.unread = false;
+      conversation.unreadCount = 0;
+      recountUnread();
+      $http.put(API_BASE + '/' + conversation._id + '/read', { userId: currentUserId })
+        .catch(function () {});
+    }
+
+    return loadActiveMessages(true);
+  };
+
+  // Full read of the active thread (used on open).
+  function loadActiveMessages(full) {
+    if (!vm.activeConversation) return;
+    var id = vm.activeConversation._id;
+
+    var params = { userId: currentUserId };
+    if (!full && vm.lastFetchedAt) {
+      // Step back a second so two messages written in the same millisecond
+      // are never skipped; duplicates are filtered out below.
+      params.since = new Date(new Date(vm.lastFetchedAt).getTime() - 1000).toISOString();
+    }
+
+    return $http.get(API_BASE + '/' + id + '/messages', { params: params })
+      .then(function (res) {
+        if (!vm.activeConversation || vm.activeConversation._id !== id) return;
+
+        var incoming = res.data.messages || [];
+        if (full) {
+          vm.messages = incoming;
+        } else if (incoming.length) {
+          var seen = {};
+          vm.messages.forEach(function (m) { if (m._id) seen[m._id] = true; });
+          var fresh = incoming.filter(function (m) { return !m._id || !seen[m._id]; });
+
+          if (fresh.length) {
+            vm.messages = vm.messages.concat(fresh);
+            // they are on screen now, so clear their unread state
+            $http.put(API_BASE + '/' + id + '/read', { userId: currentUserId }).catch(function () {});
+            var row = findConversation(id);
+            if (row) { row.unread = false; row.unreadCount = 0; recountUnread(); }
+          }
+        }
+        vm.lastFetchedAt = res.data.lastMessageTime;
+        if (full || isNearBottom()) { scrollToBottom(); }
+      })
+      .catch(function (err) {
+        console.warn('Error loading messages:', err);
+      });
+  }
+
+  // ---- SEND --------------------------------------------------------
+  // The server response is the whole saved conversation, so the preview in
+  // the inbox updates (and jumps to the top) the moment the message is sent.
+  vm.addMessage = function () {
+    var text = (vm.draftMessage || '').trim();
+    if (!text || !vm.activeConversation || vm.sending) return;
+
+    vm.sending = true;
+    vm.errorMessage = '';
+
+    $http.post(API_BASE + '/' + vm.activeConversation._id + '/messages', {
+      userId: currentUserId,
+      text: text
+    }).then(function (res) {
+      var saved = res.data;
+      saved.lastMessageIsMine = true;
+      var row = upsertConversation(saved);
+      vm.activeConversation = row || saved;
+      vm.messages = saved.messages || [];
+      vm.lastFetchedAt = saved.lastMessageTime;
+      vm.draftMessage = '';
+      scrollToBottom();
+      loadPeople(true);
+    }).catch(function (err) {
+      vm.errorMessage = (err.data && err.data.error) || 'Failed to send the message.';
+      vm.draftMessage = text;   // put the text back so nothing is lost
+    }).finally(function () {
+      vm.sending = false;
+    });
+  };
+
+  vm.handleKeyPress = function (event) {
+    if (event.which === 13) { event.preventDefault(); vm.addMessage(); }
+  };
+
+  // ---- Verify identity (kept from the original page) -----------------
+  vm.validateIdentity = function () {
+    if (!vm.activeConversation) return;
+    $http.put(API_BASE + '/' + vm.activeConversation._id + '/verify-identity', { userId: currentUserId })
+      .then(function () {
+        vm.activeConversation.identityVerified = true;
+      })
+      .catch(function () {
+        vm.errorMessage = 'Failed to verify identity in database.';
+      });
+  };
+
+  // ---- Remove: hides it for me only, the other person keeps it --------
+  vm.deleteConversation = function (conversation, $event) {
+    if ($event) { $event.stopPropagation(); }
+    if (!conversation || !conversation._id) return;
+
+    $http.delete(API_BASE + '/' + conversation._id, { params: { userId: currentUserId } })
+      .then(function () {
+        vm.conversations = vm.conversations.filter(function (c) {
+          return c._id !== conversation._id;
+        });
+        if (vm.activeConversation && vm.activeConversation._id === conversation._id) {
+          vm.activeConversation = null;
+          vm.messages = [];
+        }
+        recountUnread();
+        loadPeople(true);
+      })
+      .catch(function (err) {
+        vm.errorMessage = (err.data && err.data.error) || 'Failed to remove the conversation.';
+      });
+  };
+
+  // ---- Start everything ---------------------------------------------
+  if (currentUserId) {
+    pingPresence();
+    loadInbox().then(function () {
+      // Open the most recent thread straight away, like the page always has.
+      if (!vm.activeConversation && vm.conversations.length > 0) {
+        vm.selectConversation(vm.conversations[0]);
+      }
+    });
+    loadPeople();
+
+    // Incoming messages from other users land in the inbox automatically.
+    $interval(function () {
+      if (document.hidden) { return; }   // nothing to do while the tab is hidden
+      loadInbox(true);
+      loadActiveMessages(false);
+    }, POLL_MS);
+
+    $interval(pingPresence, PING_MS);
+
+    // Refresh online/offline dots (display only).
+    $interval(function () { if (!document.hidden) loadPeople(true); }, 20000);
+  }
+}
+
+// ---------------- CUSTOM DIRECTIVES ----------------
+function pulseClickDirective() {
+  return {
+    restrict: 'A',
+    link: function (scope, element) {
+      element.on('click', function () {
+        element.removeClass('pulse-anim');
+        void element[0].offsetWidth;
+        element.addClass('pulse-anim');
+      });
+    }
+  };
+}
+</script>
+
+</body>
+</html>

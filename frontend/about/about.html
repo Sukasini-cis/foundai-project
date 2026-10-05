@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="foundAIApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoundAI — About | Intelligent Recovery</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- AngularJS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular-animate.min.js"></script>
+
+    <!-- External CSS -->
+    <style>
+  :root{
+    --ink:#0d0a1f;
+    --violet-900:#1a1233;
+    --violet-700:#4c2f9e;
+    --violet-500:#6d3ff2;
+    --violet-400:#8b5cf6;
+    --paper:#ffffff;
+    --mist:#f4f2fb;
+    --line:#e7e3f5;
+    --slate:#5c5877;
+    --mint:#22c55e;
+    --amber:#f5a524;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Inter', sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font-body);color:var(--ink);background:var(--paper);line-height:1.5;}
+  a{text-decoration:none;color:inherit;}
+  ul{list-style:none;}
+
+  /* ---------- header ---------- */
+  header.topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 48px;border-bottom:1px solid var(--line);
+    background:var(--paper);position:sticky;top:0;z-index:20;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--violet-500),var(--violet-700));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-display);font-weight:700;
+  }
+  .brand-name{font-family:var(--font-display);font-weight:700;font-size:17px;line-height:1.1;}
+  .brand-tag{font-size:9.5px;letter-spacing:.14em;color:var(--slate);text-transform:uppercase;}
+  nav.primary-nav{display:flex;gap:32px;font-size:14px;font-weight:500;color:var(--ink);}
+  nav.primary-nav a{opacity:.75;transition:opacity .15s;}
+  nav.primary-nav a:hover{opacity:1;}
+  .nav-right{display:flex;align-items:center;gap:20px;font-size:14px;}
+  .btn{
+    padding:10px 18px;border-radius:9px;font-weight:600;font-size:13.5px;
+    border:1px solid transparent;cursor:pointer;font-family:var(--font-body);
+  }
+  .btn-primary{background:var(--violet-500);color:#fff;}
+  .btn-primary:hover{background:var(--violet-700);}
+  .btn-outline{background:transparent;color:var(--ink);border-color:var(--line);}
+  .btn-outline:hover{border-color:var(--violet-400);}
+
+  /* ---------- hero ---------- */
+  section.hero{
+    position:relative;overflow:hidden;
+    background-color:var(--violet-900);
+    background-image:
+      linear-gradient(var(--violet-700) 1px, transparent 1px),
+      linear-gradient(90deg, var(--violet-700) 1px, transparent 1px);
+    background-size:26px 26px;
+    padding:96px 48px 110px;
+  }
+  section.hero::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(60% 55% at 22% 30%, rgba(109,63,242,.55), transparent 70%);
+    pointer-events:none;
+  }
+  .hero-grid{
+    position:relative;z-index:1;
+    display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
+    max-width:1180px;margin:0 auto;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:6px 14px;border-radius:999px;
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);
+    color:#d9cfff;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+    margin-bottom:22px;
+  }
+  .eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--violet-400);}
+  h1.hero-title{
+    font-family:var(--font-display);color:#fff;font-weight:700;
+    font-size:48px;line-height:1.08;letter-spacing:-.01em;margin-bottom:20px;
+  }
+  h1.hero-title .accent{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:#fff;color:var(--violet-900);border-radius:10px;
+    padding:2px 12px;margin-left:4px;
+  }
+  p.hero-copy{color:#c9c2e6;font-size:16px;max-width:480px;margin-bottom:32px;}
+  .hero-actions{display:flex;gap:14px;}
+  .btn-light{background:#fff;color:var(--violet-900);}
+  .btn-ghost{background:transparent;color:#fff;border-color:rgba(255,255,255,.28);}
+
+  /* ---------- hero device card ---------- */
+  .scan-card{
+    background:#120c26;border-radius:16px;border:1px solid rgba(255,255,255,.08);
+    overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+  }
+  .scan-card-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px;background:#0f0a20;
+  }
+  .dots{display:flex;gap:6px;}
+  .dots span{width:9px;height:9px;border-radius:50%;}
+  .dots span:nth-child(1){background:#ff6459;}
+  .dots span:nth-child(2){background:#f5bd4f;}
+  .dots span:nth-child(3){background:#61c554;}
+  .scan-card-title{font-size:10.5px;letter-spacing:.12em;color:#948eb8;text-transform:uppercase;}
+  .scan-media{position:relative;padding:20px;}
+  .scan-media img{width:100%;display:block;border-radius:10px;}
+  .match-pill{
+    position:absolute;top:34px;right:34px;
+    background:rgba(15,10,32,.85);border:1px solid rgba(34,197,94,.4);
+    color:var(--mint);font-size:11px;font-weight:600;
+    padding:6px 10px;border-radius:8px;display:flex;align-items:center;gap:6px;
+  }
+  .match-pill::before{content:"✓";}
+  .tag-pill{
+    position:absolute;top:78px;left:34px;
+    background:var(--violet-500);color:#fff;font-size:10px;font-weight:700;
+    letter-spacing:.05em;padding:4px 9px;border-radius:6px;
+  }
+  .frame-box{
+    position:absolute;border:1.5px dashed rgba(255,255,255,.6);border-radius:6px;
+  }
+  .nav-pill{
+    position:absolute;bottom:36px;left:34px;
+    background:rgba(15,10,32,.85);border:1px solid rgba(139,92,246,.4);
+    color:#c9baff;font-size:10.5px;padding:6px 10px;border-radius:8px;
+  }
+  .nav-pill b{display:block;color:#fff;font-size:11.5px;}
+  .scan-footer{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 18px;border-top:1px solid rgba(255,255,255,.08);
+    font-size:11px;color:#948eb8;
+  }
+  .status-live{color:var(--mint);display:flex;align-items:center;gap:6px;}
+  .status-live::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--mint);}
+
+  /* ---------- features ---------- */
+  section.features{padding:96px 48px;background:var(--paper);}
+  .section-head{max-width:640px;margin:0 auto 56px;text-align:center;}
+  .section-head h2{font-family:var(--font-display);font-size:32px;font-weight:700;margin-bottom:14px;}
+  .section-head p{color:var(--slate);font-size:15.5px;}
+  .feature-grid{
+    max-width:1180px;margin:0 auto 48px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
+  }
+  .feature-card{
+    border:1px solid var(--line);border-radius:14px;padding:26px 22px;background:var(--paper);
+    transition:box-shadow .15s, transform .15s;
+  }
+  .feature-card:hover{box-shadow:0 16px 30px -18px rgba(76,47,158,.35);transform:translateY(-2px);}
+  .feature-icon{
+    width:38px;height:38px;border-radius:10px;background:var(--mist);
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:17px;
+  }
+  .feature-card h3{font-family:var(--font-display);font-size:16px;margin-bottom:8px;}
+  .feature-card p{font-size:13.5px;color:var(--slate);}
+
+  /* ---------- campus + stats ---------- */
+  .split-row{
+    max-width:1180px;margin:0 auto;
+    display:grid;grid-template-columns:1.15fr .85fr;gap:20px;
+  }
+  .campus-card{
+    position:relative;border-radius:16px;overflow:hidden;min-height:280px;
+    background:linear-gradient(0deg, rgba(9,6,20,.92), rgba(9,6,20,.15)), var(--img) center/cover no-repeat;
+    display:flex;align-items:flex-end;padding:26px;
+  }
+  .campus-copy .eyebrow-small{
+    color:#b7a8ff;font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;
+  }
+  .campus-copy h3{color:#fff;font-family:var(--font-display);font-size:22px;margin-bottom:8px;}
+  .campus-copy p{color:#cdc6e6;font-size:13.5px;max-width:420px;}
+
+  .stats-card{
+    border-radius:16px;padding:26px;color:#fff;
+    background:linear-gradient(160deg,var(--violet-500),var(--violet-700));
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .stats-card h3{font-family:var(--font-display);font-size:18px;}
+  .stats-card .stats-sub{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#ddd4ff;margin-top:-10px;}
+  .stat-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:14px;border-top:1px solid rgba(255,255,255,.18);
+  }
+  .stat-row .stat-label{display:flex;align-items:center;gap:8px;font-size:13.5px;color:#e9e4ff;}
+  .stat-row .stat-value{font-family:var(--font-display);font-weight:700;font-size:18px;}
+  .stats-note{
+    background:rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;
+    font-size:12px;color:#efeaff;line-height:1.55;
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    margin-top:80px;border-top:1px solid var(--line);
+    padding:26px 48px;display:flex;align-items:center;justify-content:space-between;
+    font-size:12.5px;color:var(--slate);
+  }
+  .footer-brand{display:flex;align-items:center;gap:10px;}
+  .footer-links{display:flex;gap:22px;}
+
+  @media (max-width:960px){
+    .hero-grid,.split-row,.feature-grid{grid-template-columns:1fr;}
+    nav.primary-nav{display:none;}
+  }
+
+  /* ============================================================
+     ANIMATION — scrollReveal directive
+     Element starts hidden/offset (.reveal-init), then transitions
+     to visible once the directive adds .reveal-visible.
+     ============================================================ */
+  .reveal-init{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .reveal-visible{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* ============================================================
+     ANIMATION — tiltCard directive
+     Smooths out the transform the directive applies on mousemove.
+     ============================================================ */
+  .scan-card{
+    transition:transform .15s ease-out;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+
+  /* ============================================================
+     ANIMATION — ngAnimate hooks for ng-if (hero content, match pill)
+     ngAnimate automatically adds/removes these classes around the
+     DOM insertion driven by ng-if in about.html.
+     ============================================================ */
+  .hero-content.ng-enter{
+    transition:opacity .7s ease, transform .7s ease;
+    opacity:0;
+    transform:translateY(20px);
+  }
+  .hero-content.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  .match-pill.ng-enter{
+    transition:opacity .35s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
+    opacity:0;
+    transform:scale(.55);
+  }
+  .match-pill.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:scale(1);
+  }
+
+  /* ============================================================
+     ANIMATION — ngAnimate hooks for ng-repeat (feature cards, stats)
+     ============================================================ */
+  .feature-card.ng-enter{
+    transition:opacity .5s ease, transform .5s ease;
+    opacity:0;
+    transform:translateY(16px);
+  }
+  .feature-card.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateY(0);
+  }
+  .feature-card.ng-leave{
+    transition:opacity .3s ease, transform .3s ease;
+    opacity:1;
+  }
+  .feature-card.ng-leave.ng-leave-active{
+    opacity:0;
+    transform:translateY(-10px);
+  }
+
+  .stat-row.ng-enter{
+    transition:opacity .4s ease, transform .4s ease;
+    opacity:0;
+    transform:translateX(-12px);
+  }
+  .stat-row.ng-enter.ng-enter-active{
+    opacity:1;
+    transform:translateX(0);
+  }
+  .stat-row.ng-leave{
+    transition:opacity .25s ease;
+    opacity:1;
+  }
+  .stat-row.ng-leave.ng-leave-active{
+    opacity:0;
+  }
+</style>
+</head>
+
+<body ng-controller="AboutController as vm">
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="topbar">
+
+        <div class="brand">
+            <div class="brand-mark">◈</div>
+
+            <div>
+                <div class="brand-name">{{ vm.brand.name }}</div>
+                <div class="brand-tag">{{ vm.brand.tagline }}</div>
+            </div>
+        </div>
+
+        <nav class="primary-nav">
+            
+          
+        </nav>
+
+        <div class="nav-right">
+           
+            <button class="btn btn-primary" onclick="window.location.href='../admin/admin-login.html'">Get Started as Admin</button>
+        </div>
+
+    </header>
+
+    <!-- ================= HERO ================= -->
+
+    <section class="hero">
+
+        <div class="hero-grid">
+
+            <div>
+
+                <div class="hero-content" ng-if="vm.ready">
+
+                    <span class="eyebrow">
+                        <span class="eyebrow-dot"></span>
+                        {{ vm.hero.eyebrow }}
+                    </span>
+
+                    <h1 class="hero-title">
+                        {{ vm.hero.titleLine1 }}
+                        <br>
+                        {{ vm.hero.titleLine2 }}
+                        <span class="accent">AI</span>
+                    </h1>
+
+                    <p class="hero-copy">
+                        {{ vm.hero.copy }}
+                    </p>
+
+                    <div class="hero-actions">
+                        <button class="btn btn-light" onclick="window.location.href='../login/index.html'">
+                            Get Started As User →
+                        </button>
+
+                        <a class="btn btn-ghost" href="#features">
+                            Explore Features
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Scan Card -->
+
+            <div class="scan-card" tilt-card>
+
+                <div class="scan-card-bar">
+
+                    <div class="dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <div class="scan-card-title">
+                        {{ vm.scan.title }}
+                    </div>
+
+                    <div></div>
+
+                </div>
+
+                <div class="scan-media">
+
+                    <span class="tag-pill">
+                        {{ vm.scan.tag }}
+                    </span>
+
+                    <span class="match-pill" ng-if="vm.scan.matched">
+                        {{ vm.scan.matchLabel }}
+                        {{ vm.scan.similarity | percentage }}
+                    </span>
+
+                    <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=700&q=80"
+                        alt="Backpack under scan">
+
+                    <div class="frame-box"
+                        style="top:38%;left:32%;width:36%;height:42%;">
+                    </div>
+
+                    <span class="nav-pill">
+                        AR NAVIGATION
+                        <b>
+                            In Range:
+                            {{ vm.scan.location }}
+                        </b>
+                    </span>
+
+                </div>
+
+                <div class="scan-footer">
+
+                    <span class="status-live">
+                        Matching Engine:
+                        {{ vm.scan.engineStatus }}
+                    </span>
+
+                    <span>
+                        Open Camera Feed ›
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FEATURES ================= -->
+
+    <section class="features" id="features">
+
+        <div class="section-head" scroll-reveal>
+         
+
+            <h2>
+                <i>Intelligent Recovery Infrastructure</i>
+            </h2>
+
+           <p style="font-family: Georgia, 'Times New Roman', Times, serif; font-size: 1.1rem; line-height: 1.6; color: #2c3e50;"></p>
+                Our multi-layered approach uses every piece of data to ensure
+                your items are safely reconnected.
+            </p>
+
+        </div>
+
+        <div class="feature-grid">
+
+            <div class="feature-card"
+                 ng-repeat="feature in vm.features | orderBy:'order'"
+                 scroll-reveal
+                 reveal-delay="{{ $index * 90 }}">
+
+                <div class="feature-icon">
+                    {{ feature.icon }}
+                </div>
+
+                <h3>
+                    {{ feature.title }}
+                </h3>
+
+                <p>
+                    {{ feature.description }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- Campus + Statistics -->
+
+        <div class="split-row">
+
+            <div class="campus-card"
+                 scroll-reveal
+                 style="--img:url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1000&q=80');">
+
+                <div class="campus-copy">
+
+                    <div class="eyebrow-small">
+                        {{ vm.campus.eyebrow }}
+                    </div>
+
+                    <h3>
+                        {{ vm.campus.title }}
+                    </h3>
+
+                    <p>
+                        {{ vm.campus.copy }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="stats-card" scroll-reveal reveal-delay="150">
+
+                <div>
+
+                    <h3>
+                        Live Statistics
+                    </h3>
+                    <br>
+                    <div class="stats-sub">
+                        Active Operational Network Status
+                    </div>
+
+                </div>
+
+                <div class="stat-row"
+                     ng-repeat="stat in vm.stats">
+
+                    <span class="stat-label">
+                        {{ stat.icon }}
+                        {{ stat.label }}
+                    </span>
+
+                    <span class="stat-value"
+                          count-up="stat.value"
+                          count-type="{{ stat.type }}"
+                          count-suffix="{{ stat.suffix }}">
+                    </span>
+
+                </div>
+
+                <div class="stats-note">
+                    {{ vm.statsNote }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="footer-brand">
+
+            <div class="brand-mark"
+                 style="width:26px;height:26px;font-size:13px;">
+                ◈
+            </div>
+
+            <span>
+                {{ vm.brand.name }}
+                &copy;
+                {{ vm.currentYear }}
+                {{ vm.brand.legalName }}.
+                All Engines Operational.
+                Secure AES-256 Encryption Protocol.
+            </span>
+
+        </div>
+
+        <div class="footer-links">
+
+            <a href="#">
+                Privacy Policy
+            </a>
+
+            <a href="#">
+                Terms of Service
+            </a>
+
+        </div>
+
+    </footer>
+
+    <!-- External JavaScript -->
+    <script>
+// ============================================================
+// AngularJS 1.x module — About page for FoundAI
+// Demonstrates: module, service (DI), controller, custom filters,
+// custom directives, ngAnimate, two-way/interpolation data binding,
+// ng-repeat, ng-if
+// ============================================================
+angular.module('foundAIApp', ['ngAnimate'])
+
+  // ---------------- SERVICE ----------------
+  // Central data source. Injected into the controller instead of
+  // hard-coding values in the template/controller.
+  .service('StatsService', function () {
+
+    this.getBrand = function () {
+      return {
+        name: 'FoundAI',
+        legalName: 'Networks Inc.',
+        tagline: 'Intelligent Recovery'
+      };
+    };
+
+    this.getHero = function () {
+      return {
+        eyebrow: 'Next-Gen Recovery Engine',
+        titleLine1: 'Find Lost Items',
+        titleLine2: 'Smarter with',
+        copy: 'Experience the future of recovery. Our intelligent engine combines computer vision, AR spatial tracking, and CCTV integration to reunite you with your belongings in minutes, not days.'
+      };
+    };
+
+    this.getScan = function () {
+      return {
+        title: 'Smart Campus Security: Central',
+        tag: 'Backpack_094',
+        matchLabel: 'Match Found',
+        similarity: 0.984,
+        location: 'Central Library',
+        engineStatus: 'Active'
+      };
+    };
+
+    this.getFeatures = function () {
+      return [
+        { order: 1, icon: '⤢', title: 'AI Visual Search', description: 'Upload a photo and let our neural networks scan millions of lost items globally with sub-millimeter precision.' },
+        { order: 2, icon: 'A', title: 'AR Navigation', description: 'Once an item is located, get real-time augmented reality directions straight to the pickup location on your phone.' },
+        { order: 3, icon: '▶', title: 'CCTV Portal', description: 'Secure, privacy-first access to municipal and university camera networks to retrace your item\u2019s last seen trajectory.' },
+        { order: 4, icon: '🔔', title: 'Smart Alerts', description: 'Predictive alerts warn you if you\u2019ve left a high-value item behind based on your movement and historical habits.' }
+      ];
+    };
+
+    this.getCampus = function () {
+      return {
+        eyebrow: 'Integrated Smart Cities',
+        title: 'Connected Campus & Urban Grids',
+        copy: 'FoundAI connects with urban infrastructure to create a seamless safety net for your valuables across dense metropolitan areas.'
+      };
+    };
+
+    this.getLiveStats = function () {
+      return [
+        { icon: '%', label: 'Recovery Rate', type: 'percent', value: 0.982 },
+        { icon: '⏱', label: 'Avg. Recovery Time', type: 'raw', value: 14, suffix: ' mins' },
+        { icon: '◈', label: 'Items Registered', type: 'compact', value: 1200000 }
+      ];
+    };
+
+    this.getStatsNote = function () {
+      return 'Recent integrations with municipal and campus transport services led to a record-low 14-minute average return time across East Coast hubs.';
+    };
+  })
+
+  // ---------------- FILTERS ----------------
+  // percentage: 0.984 -> "98.4%"
+  .filter('percentage', function () {
+    return function (input, decimals) {
+      if (typeof input !== 'number') { return input; }
+      decimals = angular.isDefined(decimals) ? decimals : 1;
+      return (input * 100).toFixed(decimals) + '%';
+    };
+  })
+
+  // compactNumber: 1200000 -> "1.2M"
+  .filter('compactNumber', function () {
+    return function (input) {
+      if (typeof input !== 'number') { return input; }
+      if (input >= 1000000) { return (input / 1000000).toFixed(1).replace(/\.0$/, '') + 'M'; }
+      if (input >= 1000) { return (input / 1000).toFixed(1).replace(/\.0$/, '') + 'K'; }
+      return String(input);
+    };
+  })
+
+  // ---------------- DIRECTIVES ----------------
+
+  // scrollReveal: fades + slides an element in the first time it enters
+  // the viewport. Optional "reveal-delay" (ms) staggers a group of items.
+  // Usage: <div scroll-reveal reveal-delay="150">...</div>
+  .directive('scrollReveal', function () {
+    return {
+      restrict: 'A',
+      scope: {
+        revealDelay: '@'
+      },
+      link: function (scope, element) {
+        element.addClass('reveal-init');
+        var delay = parseInt(scope.revealDelay, 10) || 0;
+
+        // Graceful fallback for environments without IntersectionObserver.
+        if (!('IntersectionObserver' in window)) {
+          element.addClass('reveal-visible');
+          return;
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              setTimeout(function () {
+                element.addClass('reveal-visible');
+              }, delay);
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.15 });
+
+        observer.observe(element[0]);
+
+        scope.$on('$destroy', function () {
+          observer.disconnect();
+        });
+      }
+    };
+  })
+
+  // countUp: animates a number from 0 up to its bound target value, then
+  // formats each frame with the same 'percentage' / 'compactNumber' filters
+  // already defined above, so the animated output always matches the
+  // static formatting used elsewhere on the page.
+  // Usage: <span count-up="stat.value" count-type="stat.type" count-suffix="stat.suffix"></span>
+  .directive('countUp', ['$filter', function ($filter) {
+    return {
+      restrict: 'A',
+      scope: {
+        countUp: '<',
+        countType: '@',
+        countSuffix: '@'
+      },
+      link: function (scope, element) {
+        var duration = 1400;
+        var endVal = scope.countUp;
+        var startTime = null;
+
+        function format(val) {
+          if (scope.countType === 'percent') {
+            return $filter('percentage')(val);
+          }
+          if (scope.countType === 'compact') {
+            return $filter('compactNumber')(val);
+          }
+          return Math.round(val) + (scope.countSuffix || '');
+        }
+
+        function easeOutCubic(t) {
+          return 1 - Math.pow(1 - t, 3);
+        }
+
+        function step(timestamp) {
+          if (!startTime) { startTime = timestamp; }
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var current = endVal * easeOutCubic(progress);
+          element.text(format(current));
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            element.text(format(endVal));
+          }
+        }
+
+        element.text(format(0));
+
+        if (!('IntersectionObserver' in window)) {
+          requestAnimationFrame(step);
+          return;
+        }
+
+        // Only start counting once the stat actually scrolls into view.
+        var observer = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              requestAnimationFrame(step);
+              observer.disconnect();
+            }
+          });
+        }, { threshold: 0.4 });
+
+        observer.observe(element[0]);
+
+        scope.$on('$destroy', function () {
+          observer.disconnect();
+        });
+      }
+    };
+  }])
+
+  // tiltCard: subtle pointer-driven 3D tilt, used on the hero scan card
+  // to make it feel like a physical device panel.
+  // Usage: <div tilt-card>...</div>
+  .directive('tiltCard', function () {
+    return {
+      restrict: 'A',
+      link: function (scope, element) {
+        var el = element[0];
+
+        function handleMove(e) {
+          var bounds = el.getBoundingClientRect();
+          var x = e.clientX - bounds.left;
+          var y = e.clientY - bounds.top;
+          var rotateX = ((y - bounds.height / 2) / (bounds.height / 2)) * -4;
+          var rotateY = ((x - bounds.width / 2) / (bounds.width / 2)) * 4;
+          el.style.transform =
+            'perspective(900px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) translateY(-2px)';
+        }
+
+        function reset() {
+          el.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0)';
+        }
+
+        element.on('mousemove', handleMove);
+        element.on('mouseleave', reset);
+
+        scope.$on('$destroy', function () {
+          element.off('mousemove', handleMove);
+          element.off('mouseleave', reset);
+        });
+      }
+    };
+  })
+
+  // ---------------- CONTROLLER ----------------
+  // StatsService is injected (dependency injection) rather than
+  // the controller reaching out and building its own data.
+  .controller('AboutController', ['StatsService', '$timeout', function (StatsService, $timeout) {
+    var vm = this;
+
+    vm.brand      = StatsService.getBrand();
+    vm.hero       = StatsService.getHero();
+    vm.scan       = StatsService.getScan();
+    vm.features   = StatsService.getFeatures();
+    vm.campus     = StatsService.getCampus();
+    vm.stats      = StatsService.getLiveStats();
+    vm.statsNote  = StatsService.getStatsNote();
+    vm.currentYear = new Date().getFullYear();
+
+    // Drives the hero's ng-if entrance animation (handled by ngAnimate)
+    // and the "match found" pill's pop-in animation.
+    vm.ready = false;
+    vm.scan.matched = false;
+
+    $timeout(function () {
+      vm.ready = true;
+    }, 100);
+
+    $timeout(function () {
+      vm.scan.matched = true;
+    }, 900);
+  }]);
+
+</script>
+
+</body>
+</html>

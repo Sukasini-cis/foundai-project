@@ -1,0 +1,2815 @@
+<!DOCTYPE html>
+<html ng-app="heatmapApp">
+
+<head>
+
+    <title>FoundAI | Risk Analytics</title>
+
+    <!-- =====================================================
+         ANGULARJS
+    ====================================================== -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+
+    <!-- AngularJS ngAnimate -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <style>
+
+        :root {
+
+            --bg: #f8f9fc;
+            --sidebar: #ffffff;
+            --accent: #7c4dff;
+            --dark-panel: #1a1a2e;
+            --text: #2c3e50;
+            --muted: #7f8c8d;
+
+            --high-risk: #ff4757;
+            --med-risk: #ffa502;
+            --low-risk: #2ed573;
+
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family: 'Segoe UI', sans-serif;
+
+            background: var(--bg);
+
+            color: var(--text);
+
+            overflow-x: hidden;
+
+        }
+
+
+        /* =====================================================
+           APP
+        ====================================================== */
+
+        .app-container {
+
+            display: flex;
+
+            min-height: 100vh;
+
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ====================================================== */
+
+        .sidebar {
+            width: 270px;
+            background: #ffffff;
+            border-right: 1px solid #e5def4;
+            padding: 24px 18px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            font-weight: 700;
+            color: #111827;
+            margin: 0 0 28px 6px;
+            font-size: 18px;
+            line-height: 1.1;
+        }
+
+        .logo::before {
+            content: "◎";
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            margin-right: 10px;
+            vertical-align: middle;
+            border-radius: 11px;
+            background: #6437d6;
+            color: white;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(100, 55, 214, 0.25);
+        }
+
+        .logo small {
+            display: block;
+            margin-left: 53px;
+            margin-top: -5px;
+            color: #5f4b91 !important;
+            font-size: 8px;
+            letter-spacing: 1.2px;
+            font-weight: 600;
+        }
+
+        .sidebar-search {
+            width: 100%;
+            height: 43px;
+            border: 1px solid #e5def4;
+            border-radius: 12px;
+            background: #faf9ff;
+            color: #5f6280;
+            padding: 0 14px;
+            font-size: 13px;
+            outline: none;
+            margin-bottom: 18px;
+        }
+
+        .sidebar-search::placeholder {
+            color: #777b96;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 12px 14px;
+            color: #4f526b;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            list-style: none;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background: #f4f0ff;
+            color: #6437d6;
+        }
+
+        .nav-item.active {
+            background: #eee8ff;
+            color: #6437d6;
+        }
+
+        .sidebar-icon {
+            width: 28px;
+            margin-right: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            color: #5d6078;
+            flex-shrink: 0;
+        }
+
+        .nav-item.active .sidebar-icon,
+        .nav-item:hover .sidebar-icon {
+            color: #6437d6;
+        }
+
+        .update-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #6437d6;
+            margin-left: auto;
+        }
+
+
+
+        /* =====================================================
+           MAIN CONTENT
+        ====================================================== */
+
+        .main-content {
+
+            flex: 1;
+
+            margin-left: 270px;
+
+            padding: 30px;
+
+        }
+
+
+        .header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        /* =====================================================
+           LIVE ENGINE
+        ====================================================== */
+
+        .live-model {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            font-size: 10px;
+
+            color: var(--low-risk);
+
+            font-weight: bold;
+
+        }
+
+
+        .live-dot {
+
+            width: 7px;
+
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--low-risk);
+
+        }
+
+
+        /* =====================================================
+           FORECAST BANNER
+        ====================================================== */
+
+        .forecast-banner {
+
+            background: var(--dark-panel);
+
+            color: white;
+
+            border-radius: 15px;
+
+            padding: 25px;
+
+            margin-bottom: 30px;
+
+            position: relative;
+
+            border-left: 5px solid var(--high-risk);
+
+            overflow: hidden;
+
+        }
+
+
+        .forecast-glow {
+
+            position: absolute;
+
+            width: 180px;
+
+            height: 180px;
+
+            right: 30px;
+
+            top: 10px;
+
+            border-radius: 50%;
+
+            background: rgba(124, 77, 255, 0.18);
+
+            pointer-events: none;
+
+            opacity: 0.7;
+
+        }
+
+
+        /* =====================================================
+           STATS
+        ====================================================== */
+
+        .stats-row {
+
+            display: grid;
+
+            grid-template-columns: 2fr 1fr;
+
+            gap: 20px;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .card {
+
+            background: white;
+
+            border-radius: 12px;
+
+            border: 1px solid #e2e8f0;
+
+            padding: 20px;
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+
+        /* =====================================================
+           MAP
+        ====================================================== */
+
+        .map-container {
+
+            background: #0f172a;
+
+            height: 350px;
+
+            border-radius: 12px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            background-image:
+
+                radial-gradient(
+                    rgba(255,255,255,0.05) 1px,
+                    transparent 1px
+                );
+
+            background-size: 30px 30px;
+
+        }
+
+
+        /* =====================================================
+           HOTSPOT
+
+           IMPORTANT:
+           No CSS transition.
+
+           Position remains:
+           translate(-50%, -50%)
+
+           JS controls scale animation.
+        ====================================================== */
+
+        .hotspot {
+
+            position: absolute;
+
+            cursor: pointer;
+
+            transform: translate(-50%, -50%);
+
+            z-index: 2;
+
+        }
+
+
+        .hotspot-circle {
+
+            border-radius: 50%;
+
+            opacity: 0.4;
+
+            border:
+                2px solid
+                rgba(255,255,255,0.2);
+
+        }
+
+
+        .hotspot-label {
+
+            position: absolute;
+
+            top: 110%;
+
+            left: 50%;
+
+            transform: translateX(-50%);
+
+            white-space: nowrap;
+
+            font-size: 9px;
+
+            color: white;
+
+            background: rgba(0,0,0,0.6);
+
+            padding: 2px 6px;
+
+            border-radius: 4px;
+
+        }
+
+
+        /* =====================================================
+           SELECTED HOTSPOT
+        ====================================================== */
+
+        .hotspot-selected {
+
+            z-index: 10;
+
+        }
+
+
+        /* =====================================================
+           MAP LEGEND
+        ====================================================== */
+
+        .risk-legend {
+
+            display: flex;
+
+            gap: 15px;
+
+            margin-top: 12px;
+
+            font-size: 10px;
+
+            color: var(--muted);
+
+        }
+
+
+        .legend-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+        }
+
+
+        .legend-dot {
+
+            width: 8px;
+
+            height: 8px;
+
+            border-radius: 50%;
+
+        }
+
+
+        /* =====================================================
+           PROGRESS BARS
+
+           No CSS transition.
+           JS directive controls width.
+        ====================================================== */
+
+        .progress-bg {
+
+            background: #eee;
+
+            height: 6px;
+
+            border-radius: 10px;
+
+            margin-top: 5px;
+
+            overflow: hidden;
+
+        }
+
+
+        .progress-fill {
+
+            background: var(--accent);
+
+            height: 100%;
+
+            border-radius: 10px;
+
+            width: 0%;
+
+        }
+
+
+        /* =====================================================
+           RISK INDEX
+        ====================================================== */
+
+        .risk-index-box {
+
+            text-align: center;
+
+            padding: 20px 0;
+
+        }
+
+
+        .risk-score {
+
+            font-size: 48px;
+
+            font-weight: 800;
+
+            color: var(--text);
+
+        }
+
+
+        /* =====================================================
+           DISPATCH BUTTON
+        ====================================================== */
+
+        .btn-action {
+
+            background: var(--accent);
+
+            color: white;
+
+            border: none;
+
+            padding: 10px;
+
+            border-radius: 8px;
+
+            width: 100%;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        /* =====================================================
+           ANIMATION HELPERS
+        ====================================================== */
+
+        .animation-layer {
+
+            pointer-events: none;
+
+            position: absolute;
+
+            inset: 0;
+
+        }
+
+
+        .radar-line {
+
+            position: absolute;
+
+            width: 2px;
+
+            height: 100%;
+
+            top: 0;
+
+            left: 0;
+
+            background: rgba(124,77,255,0.25);
+
+            opacity: 0;
+
+            pointer-events: none;
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ====================================================== */
+
+        @media (max-width: 900px) {
+
+            .stats-row {
+
+                grid-template-columns: 1fr;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body ng-controller="HeatmapController">
+
+
+    <div class="app-container">
+
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        
+        <aside class="sidebar">
+
+            <div class="logo">
+                FoundAI
+                <small>INTELLIGENT RECOVERY</small>
+            </div>
+
+            <input
+                class="sidebar-search"
+                type="text"
+                placeholder="Search matches, items or locations"
+            >
+
+            <ul class="nav-list">
+
+                <li class="nav-item" onclick="window.location.href='dashboard/dashboard.html'">
+                    <span class="sidebar-icon">▦</span>
+                    Dashboard
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='reportlost/reportlost.html'">
+                    <span class="sidebar-icon">⚑</span>
+                    Report Lost
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='profile/profile.html'">
+                    <span class="sidebar-icon">📁</span>
+                    My Reports
+                </li>
+
+                <li class="nav-item">
+                    <span class="sidebar-icon">✦</span>
+                    AI Search
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='arnavigation.html'">
+                    <span class="sidebar-icon">🧭</span>
+                    AR Navigation
+                </li>
+
+                <li class="nav-item active">
+                    <span class="sidebar-icon">🔥</span>
+                    AI Lost Heatmap
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='admin/reward-escrow.html'">
+                    <span class="sidebar-icon">🛡</span>
+                    Reward Escrow
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='messages/messages.html'">
+                    <span class="sidebar-icon">✉</span>
+                    Messages
+                    <span class="update-dot"></span>
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='notifi/notifi.html'">
+                    <span class="sidebar-icon">🔔</span>
+                    Notifications
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='admin/claims-history.html'">
+                    <span class="sidebar-icon">📜</span>
+                    Claims History
+                </li>
+
+                <li class="nav-item" onclick="window.location.href='admin/admin-mod.html'">
+                    <span class="sidebar-icon">⚙</span>
+                    Admin Mod
+                </li>
+
+                <li class="nav-item" onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='login/index.html';})(); return false;">
+                    <span class="sidebar-icon">⏻</span>
+                    Logout
+                </li>
+
+            </ul>
+
+        </aside>
+
+
+
+
+        <!-- =================================================
+             MAIN CONTENT
+        ================================================== -->
+
+        <main class="main-content">
+
+
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
+            <div class="header">
+
+
+                <div>
+
+                    <h2>
+                        AI Predictive Lost Heatmap & Risk Analytics
+                    </h2>
+
+
+                    <span class="live-model">
+
+                        <span class="live-dot"></span>
+
+                        LIVE SPATIAL ENGINE
+
+                    </span>
+
+                </div>
+
+
+                <div
+                    style="
+                        font-size:12px;
+                        color:var(--muted);
+                    ">
+
+                    Today's Model:
+
+                    <strong>
+                        v2.4 Spatial Engine
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 FORECAST BANNER
+                 
+                 flashOnChange watches selected hotspot.
+            ================================================== -->
+
+            <div
+
+                class="forecast-banner"
+
+                flash-on-change="{{activeHotspot.id}}"
+
+            >
+
+
+                <div class="forecast-glow"></div>
+
+
+                <div
+
+                    style="
+                        color:var(--high-risk);
+                        font-size:10px;
+                        font-weight:bold;
+                        margin-bottom:10px;
+                    "
+
+                >
+
+                    HIGH RISK ZONE FORECAST
+
+                </div>
+
+
+                <h3 style="margin:0">
+
+                    {{activeHotspot.name}}:
+                    Peak Loss Window Active
+
+                </h3>
+
+
+                <p
+
+                    style="
+                        font-size:12px;
+                        opacity:0.8;
+                        margin-top:10px;
+                    "
+
+                >
+
+                    AI predicts an
+
+                    {{activeHotspot.risk}}%
+
+                    probability of displacement in this zone
+                    between 2:00 PM - 5:30 PM today.
+
+                </p>
+
+
+                <div
+
+                    style="
+                        display:flex;
+                        gap:30px;
+                        margin-top:20px;
+                        font-size:11px;
+                    "
+
+                >
+
+                    <div>
+
+                        RECOVERY PROBABILITY
+
+                        <br>
+
+                        <strong
+                            style="
+                                color:var(--low-risk);
+                            "
+                        >
+
+                            92% Within 3 Hours
+
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        SAFEST AREA
+
+                        <br>
+
+                        <strong>
+
+                            Administration Building
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 STATS ROW
+            ================================================== -->
+
+            <div class="stats-row">
+
+
+                <!-- =================================================
+                     MAP
+                ================================================== -->
+
+                <div class="card">
+
+
+                    <h4
+                        style="
+                            margin:0 0 15px 0;
+                        "
+                    >
+
+                        Campus Spatial Risk Map
+
+                    </h4>
+
+
+                    <div class="map-container">
+
+
+                        <!-- =================================================
+                             DECORATIVE RADAR LINE
+                        ================================================== -->
+
+                        <div class="radar-line"></div>
+
+
+                        <!-- =================================================
+                             HOTSPOTS
+
+                             ng-repeat preserved.
+
+                             ngAnimate:
+                             .stagger-hotspot
+
+                             pulse-click:
+                             custom directive
+
+                             hotspot-pulse:
+                             custom directive
+                        ================================================== -->
+
+                        <div
+
+                            class="hotspot stagger-hotspot"
+
+                            ng-repeat="spot in hotspots"
+
+                            data-index="{{$index}}"
+
+                            ng-style="
+                                {
+                                    'top': spot.y + '%',
+                                    'left': spot.x + '%'
+                                }
+                            "
+
+                            ng-class="
+                                {
+                                    'hotspot-selected':
+                                    activeHotspot.id === spot.id
+                                }
+                            "
+
+                            ng-click="selectSpot(spot)"
+
+                            pulse-click
+
+                            hotspot-pulse
+
+                        >
+
+
+                            <div
+
+                                class="hotspot-circle"
+
+                                ng-style="
+                                    {
+                                        'width':
+                                            spot.size + 'px',
+
+                                        'height':
+                                            spot.size + 'px',
+
+                                        'background':
+                                            (spot.risk | riskColor)
+                                    }
+                                "
+
+                            >
+                            </div>
+
+
+                            <div class="hotspot-label">
+
+                                {{spot.name}}
+
+                                ({{spot.risk}}%)
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         LEGEND
+                    ================================================== -->
+
+                    <div class="risk-legend">
+
+
+                        <div class="legend-item">
+
+                            <span
+                                class="legend-dot"
+                                style="
+                                    background:var(--high-risk);
+                                "
+                            ></span>
+
+                            High Risk
+
+                        </div>
+
+
+                        <div class="legend-item">
+
+                            <span
+                                class="legend-dot"
+                                style="
+                                    background:var(--med-risk);
+                                "
+                            ></span>
+
+                            Medium Risk
+
+                        </div>
+
+
+                        <div class="legend-item">
+
+                            <span
+                                class="legend-dot"
+                                style="
+                                    background:var(--low-risk);
+                                "
+                            ></span>
+
+                            Low Risk
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     RISK INDEX
+                ================================================== -->
+
+                <div class="card">
+
+
+                    <h4 style="margin:0">
+
+                        CAMPUS RISK INDEX
+
+                    </h4>
+
+
+                    <div class="risk-index-box">
+
+
+                        <!-- =================================================
+                             COUNT-UP DIRECTIVE
+                        ================================================== -->
+
+                        <div
+
+                            class="risk-score"
+
+                            count-up="{{avgRisk}}"
+
+                        >
+
+                            0
+
+                        </div>
+
+
+                        <div
+
+                            style="
+                                font-size:14px;
+                                color:var(--muted);
+                                margin-top:-8px;
+                            "
+
+                        >
+
+                            /100
+
+                        </div>
+
+
+                        <p
+
+                            style="
+                                font-size:11px;
+                                color:var(--muted);
+                            "
+
+                        >
+
+                            Aggregate score from
+
+                            <strong>
+                                {{hotspots.length}}
+                            </strong>
+
+                            active displacement vectors.
+
+                        </p>
+
+                    </div>
+
+
+                    <hr
+
+                        style="
+                            border:none;
+                            border-top:1px solid #eee;
+                            margin:10px 0;
+                        "
+
+                    >
+
+
+                    <h5
+
+                        style="
+                            margin:0 0 10px 0;
+                            font-size:11px;
+                            color:var(--muted);
+                        "
+
+                    >
+
+                        ZONE DETAILS:
+
+                        {{activeHotspot.name}}
+
+                        <span ng-if="activeHotspot.reportedCount > 0" style="color:#2ed573; font-weight:bold;">
+                            &bull; {{activeHotspot.reportedCount}} live report{{activeHotspot.reportedCount === 1 ? '' : 's'}}
+                        </span>
+
+                    </h5>
+
+
+
+                    <!-- =================================================
+                         ZONE DETAILS
+
+                         progress-animate custom directive.
+                    ================================================== -->
+
+                    <div
+                        ng-if="!activeHotspot.items || activeHotspot.items.length === 0"
+                        style="font-size:11px; color:var(--muted); margin-bottom:12px;"
+                    >
+                        No lost items reported at this location yet.
+                    </div>
+
+                    <div
+
+                        ng-repeat="item in activeHotspot.items"
+
+                        style="
+                            margin-bottom:12px;
+                        "
+
+                    >
+
+
+                        <div
+
+                            style="
+                                display:flex;
+                                justify-content:space-between;
+                                font-size:11px;
+                            "
+
+                        >
+
+                            <span>
+
+                                {{item.name}}
+
+                            </span>
+
+
+                            <strong>
+
+                                {{item.pct}}%
+
+                            </strong>
+
+                        </div>
+
+
+                        <div class="progress-bg">
+
+
+                            <div
+
+                                class="progress-fill"
+
+                                progress-animate="{{item.pct}}"
+
+                            >
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =================================================
+                         DISPATCH BUTTON
+
+                         IMPORTANT:
+                         pulse-click now detects that this is NOT
+                         a hotspot.
+
+                         Therefore it only scales the button.
+
+                         It does NOT apply translate(-50%, -50%).
+                    ================================================== -->
+
+                    
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+
+    <!-- =========================================================
+         ANGULARJS
+    ========================================================== -->
+
+    <script>
+
+
+        /* =====================================================
+           MODULE
+
+           Existing:
+           heatmapApp
+
+           Added:
+           ngAnimate
+        ====================================================== */
+
+        var app = angular.module(
+
+            'heatmapApp',
+
+            ['ngAnimate']
+
+        );
+
+
+
+        /* =====================================================
+           NG-ANIMATE:
+           STAGGERED HOTSPOT ENTRANCE
+
+           Hotspots appear one after another.
+
+           Uses AngularJS animation API + requestAnimationFrame.
+        ====================================================== */
+
+        app.animation(
+
+            '.stagger-hotspot',
+
+            function() {
+
+                return {
+
+                    enter: function(
+                        element,
+                        doneFn
+                    ) {
+
+
+                        var index =
+
+                            parseInt(
+
+                                element.attr(
+                                    'data-index'
+                                )
+
+                            ) || 0;
+
+
+                        var delay =
+
+                            index * 100;
+
+
+                        var duration = 500;
+
+
+                        /*
+                         * Starting position.
+                         */
+
+                        element.css(
+                            'opacity',
+                            0
+                        );
+
+
+                        element.css(
+
+                            'transform',
+
+                            'translate(-50%, -50%) scale(0.70)'
+
+                        );
+
+
+                        setTimeout(
+
+                            function() {
+
+
+                                var start = null;
+
+
+                                function animate(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+
+                                        Math.min(
+
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+
+                                            1
+
+                                        );
+
+
+                                    /*
+                                     * Cubic ease-out.
+                                     */
+
+                                    var eased =
+
+                                        1 -
+
+                                        Math.pow(
+
+                                            1 -
+                                            progress,
+
+                                            3
+
+                                        );
+
+
+                                    /*
+                                     * Fade in.
+                                     */
+
+                                    element.css(
+
+                                        'opacity',
+
+                                        eased
+
+                                    );
+
+
+                                    /*
+                                     * Scale.
+
+                                     * IMPORTANT:
+                                     * Keep translate(-50%, -50%)
+                                     * because this is a hotspot.
+                                     */
+
+                                    var scale =
+
+                                        0.70 +
+
+                                        (
+                                            0.30 *
+                                            eased
+                                        );
+
+
+                                    element.css(
+
+                                        'transform',
+
+                                        'translate(-50%, -50%) ' +
+                                        'scale(' +
+                                        scale +
+                                        ')'
+
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            animate
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+
+                                            'transform',
+
+                                            'translate(-50%, -50%) ' +
+                                            'scale(1)'
+
+                                        );
+
+
+                                        doneFn();
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    animate
+                                );
+
+
+                            },
+
+                            delay
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           CUSTOM DIRECTIVE 1:
+           pulse-click
+
+           FIXED VERSION.
+
+           If element has class "hotspot":
+               translate(-50%, -50%) + scale()
+
+           Otherwise:
+               scale() ONLY.
+
+           Therefore Dispatch button cannot jump.
+        ====================================================== */
+
+        app.directive(
+
+            'pulseClick',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element
+                    ) {
+
+
+                        element.on(
+
+                            'click',
+
+                            function() {
+
+
+                                var duration = 220;
+
+                                var start = null;
+
+
+                                /*
+                                 * Detect hotspot.
+                                 */
+
+                                var isHotspot =
+
+                                    element.hasClass(
+                                        'hotspot'
+                                    );
+
+
+                                function animate(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+
+                                        Math.min(
+
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+
+                                            1
+
+                                        );
+
+
+                                    var scale;
+
+
+                                    /*
+                                     * Press.
+                                     */
+
+                                    if (
+                                        progress < 0.5
+                                    ) {
+
+
+                                        scale =
+
+                                            1 -
+
+                                            (
+                                                0.08 *
+
+                                                (
+                                                    progress /
+                                                    0.5
+                                                )
+                                            );
+
+
+                                    }
+
+                                    /*
+                                     * Release.
+                                     */
+
+                                    else {
+
+
+                                        scale =
+
+                                            0.92 +
+
+                                            (
+                                                0.08 *
+
+                                                (
+                                                    (
+                                                        progress -
+                                                        0.5
+                                                    ) /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+
+                                    /*
+                                     * HOTSPOT
+                                     */
+
+                                    if (
+                                        isHotspot
+                                    ) {
+
+
+                                        element.css(
+
+                                            'transform',
+
+                                            'translate(-50%, -50%) ' +
+                                            'scale(' +
+                                            scale +
+                                            ')'
+
+                                        );
+
+                                    }
+
+
+                                    /*
+                                     * NORMAL ELEMENT
+                                     *
+                                     * This includes:
+                                     *
+                                     * Dispatch Patrol button
+                                     */
+
+                                    else {
+
+
+                                        element.css(
+
+                                            'transform',
+
+                                            'scale(' +
+                                            scale +
+                                            ')'
+
+                                        );
+
+                                    }
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            animate
+                                        );
+
+                                    }
+
+                                    else {
+
+
+                                        /*
+                                         * Restore final state.
+                                         */
+
+                                        if (
+                                            isHotspot
+                                        ) {
+
+
+                                            element.css(
+
+                                                'transform',
+
+                                                'translate(-50%, -50%) ' +
+                                                'scale(1)'
+
+                                            );
+
+                                        }
+
+                                        else {
+
+
+                                            element.css(
+
+                                                'transform',
+
+                                                'scale(1)'
+
+                                            );
+
+                                        }
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    animate
+                                );
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           CUSTOM DIRECTIVE 2:
+           hotspot-pulse
+
+           Selected hotspot continuously pulses.
+
+           IMPORTANT:
+           Only hotspots use this directive.
+        ====================================================== */
+
+        app.directive(
+
+            'hotspotPulse',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element
+                    ) {
+
+
+                        var animationId = null;
+
+
+                        function stopPulse() {
+
+
+                            if (
+                                animationId !== null
+                            ) {
+
+
+                                cancelAnimationFrame(
+                                    animationId
+                                );
+
+
+                                animationId = null;
+
+                            }
+
+
+                            /*
+                             * Restore hotspot position.
+                             */
+
+                            element.css(
+
+                                'transform',
+
+                                'translate(-50%, -50%) scale(1)'
+
+                            );
+
+                        }
+
+
+                        function startPulse() {
+
+
+                            stopPulse();
+
+
+                            /*
+                             * Only animate if this
+                             * hotspot is selected.
+                             */
+
+                            if (
+                                !scope.activeHotspot ||
+                                !scope.spot
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            if (
+
+                                scope.activeHotspot.id !==
+                                scope.spot.id
+
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            var start = null;
+
+                            var duration = 1200;
+
+
+                            function animate(ts) {
+
+
+                                if (!start) {
+
+                                    start = ts;
+
+                                }
+
+
+                                var progress =
+
+                                    (
+                                        ts -
+                                        start
+                                    ) /
+                                    duration;
+
+
+                                /*
+                                 * Loop.
+                                 */
+
+                                if (
+                                    progress >= 1
+                                ) {
+
+                                    start = ts;
+
+                                    progress = 0;
+
+                                }
+
+
+                                /*
+                                 * Smooth sine pulse.
+                                 */
+
+                                var scale =
+
+                                    1 +
+
+                                    (
+                                        0.12 *
+
+                                        Math.sin(
+
+                                            progress *
+                                            Math.PI *
+                                            2
+
+                                        )
+
+                                    );
+
+
+                                element.css(
+
+                                    'transform',
+
+                                    'translate(-50%, -50%) ' +
+                                    'scale(' +
+                                    scale +
+                                    ')'
+
+                                );
+
+
+                                animationId =
+
+                                    requestAnimationFrame(
+                                        animate
+                                    );
+
+                            }
+
+
+                            animationId =
+
+                                requestAnimationFrame(
+                                    animate
+                                );
+
+                        }
+
+
+                        /*
+                         * Watch selected hotspot.
+                         */
+
+                        scope.$watch(
+
+                            'activeHotspot.id',
+
+                            function() {
+
+                                startPulse();
+
+                            }
+
+                        );
+
+
+                        /*
+                         * Start once the repeat
+                         * scope has its spot.
+                         */
+
+                        scope.$watch(
+
+                            'spot',
+
+                            function() {
+
+                                startPulse();
+
+                            }
+
+                        );
+
+
+                        /*
+                         * Cleanup.
+                         */
+
+                        scope.$on(
+
+                            '$destroy',
+
+                            function() {
+
+                                stopPulse();
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           CUSTOM DIRECTIVE 3:
+           flash-on-change
+
+           Forecast banner reacts whenever
+           selected hotspot changes.
+        ====================================================== */
+
+        app.directive(
+
+            'flashOnChange',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        var firstRun = true;
+
+
+                        attrs.$observe(
+
+                            'flashOnChange',
+
+                            function() {
+
+
+                                if (
+                                    firstRun
+                                ) {
+
+
+                                    firstRun = false;
+
+                                    return;
+
+                                }
+
+
+                                var duration = 400;
+
+                                var start = null;
+
+
+                                function animate(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+
+                                        Math.min(
+
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+
+                                            1
+
+                                        );
+
+
+                                    var scale;
+
+
+                                    if (
+                                        progress < 0.5
+                                    ) {
+
+
+                                        scale =
+
+                                            1 +
+
+                                            (
+                                                0.025 *
+
+                                                (
+                                                    progress /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+                                    else {
+
+
+                                        scale =
+
+                                            1.025 -
+
+                                            (
+                                                0.025 *
+
+                                                (
+                                                    (
+                                                        progress -
+                                                        0.5
+                                                    ) /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+
+                                    element.css(
+
+                                        'transform',
+
+                                        'scale(' +
+                                        scale +
+                                        ')'
+
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            animate
+                                        );
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+
+                                            'transform',
+
+                                            'scale(1)'
+
+                                        );
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    animate
+                                );
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           CUSTOM DIRECTIVE 4:
+           count-up
+
+           Risk score:
+
+           0 -> 58
+
+           Uses requestAnimationFrame.
+        ====================================================== */
+
+        app.directive(
+
+            'countUp',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        var currentAnimation = null;
+
+
+                        function animateTo(
+                            target
+                        ) {
+
+
+                            if (
+                                currentAnimation !== null
+                            ) {
+
+
+                                cancelAnimationFrame(
+                                    currentAnimation
+                                );
+
+                            }
+
+
+                            var startValue = 0;
+
+                            var duration = 900;
+
+                            var startTime = null;
+
+
+                            function animate(ts) {
+
+
+                                if (!startTime) {
+
+                                    startTime = ts;
+
+                                }
+
+
+                                var progress =
+
+                                    Math.min(
+
+                                        (
+                                            ts -
+                                            startTime
+                                        ) /
+                                        duration,
+
+                                        1
+
+                                    );
+
+
+                                var eased =
+
+                                    1 -
+
+                                    Math.pow(
+
+                                        1 -
+                                        progress,
+
+                                        3
+
+                                    );
+
+
+                                var value =
+
+                                    startValue +
+
+                                    (
+                                        target -
+                                        startValue
+                                    ) *
+                                    eased;
+
+
+                                element.text(
+
+                                    Math.round(
+                                        value
+                                    )
+
+                                );
+
+
+                                if (
+                                    progress < 1
+                                ) {
+
+
+                                    currentAnimation =
+
+                                        requestAnimationFrame(
+                                            animate
+                                        );
+
+                                }
+
+                                else {
+
+
+                                    currentAnimation = null;
+
+                                }
+
+                            }
+
+
+                            currentAnimation =
+
+                                requestAnimationFrame(
+                                    animate
+                                );
+
+                        }
+
+
+                        attrs.$observe(
+
+                            'countUp',
+
+                            function(value) {
+
+
+                                var target =
+
+                                    parseFloat(
+                                        value
+                                    );
+
+
+                                if (
+                                    !isNaN(target)
+                                ) {
+
+
+                                    animateTo(
+                                        target
+                                    );
+
+                                }
+
+                            }
+
+                        );
+
+
+                        scope.$on(
+
+                            '$destroy',
+
+                            function() {
+
+
+                                if (
+                                    currentAnimation !== null
+                                ) {
+
+
+                                    cancelAnimationFrame(
+                                        currentAnimation
+                                    );
+
+                                }
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           CUSTOM DIRECTIVE 5:
+           progress-animate
+
+           Animates:
+
+           0% -> 85%
+
+           0% -> 68%
+
+           etc.
+        ====================================================== */
+
+        app.directive(
+
+            'progressAnimate',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        var animationId = null;
+
+
+                        function animateTo(
+                            target
+                        ) {
+
+
+                            if (
+                                animationId !== null
+                            ) {
+
+
+                                cancelAnimationFrame(
+                                    animationId
+                                );
+
+                            }
+
+
+                            var duration = 650;
+
+                            var start = null;
+
+
+                            element.css(
+                                'width',
+                                '0%'
+                            );
+
+
+                            function animate(ts) {
+
+
+                                if (!start) {
+
+                                    start = ts;
+
+                                }
+
+
+                                var progress =
+
+                                    Math.min(
+
+                                        (
+                                            ts -
+                                            start
+                                        ) /
+                                        duration,
+
+                                        1
+
+                                    );
+
+
+                                var eased =
+
+                                    1 -
+
+                                    Math.pow(
+
+                                        1 -
+                                        progress,
+
+                                        3
+
+                                    );
+
+
+                                var width =
+
+                                    target *
+                                    eased;
+
+
+                                element.css(
+
+                                    'width',
+
+                                    width + '%'
+
+                                );
+
+
+                                if (
+                                    progress < 1
+                                ) {
+
+
+                                    animationId =
+
+                                        requestAnimationFrame(
+                                            animate
+                                        );
+
+                                }
+
+                            }
+
+
+                            animationId =
+
+                                requestAnimationFrame(
+                                    animate
+                                );
+
+                        }
+
+
+                        attrs.$observe(
+
+                            'progressAnimate',
+
+                            function(value) {
+
+
+                                var target =
+
+                                    parseFloat(
+                                        value
+                                    );
+
+
+                                if (
+                                    !isNaN(target)
+                                ) {
+
+
+                                    animateTo(
+                                        target
+                                    );
+
+                                }
+
+                            }
+
+                        );
+
+
+                        scope.$on(
+
+                            '$destroy',
+
+                            function() {
+
+
+                                if (
+                                    animationId !== null
+                                ) {
+
+
+                                    cancelAnimationFrame(
+                                        animationId
+                                    );
+
+                                }
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           OPTIONAL CATCHY EFFECT:
+           FORECAST GLOW
+
+           Small JavaScript-driven breathing effect.
+        ====================================================== */
+
+        app.directive(
+
+            'forecastGlow',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element
+                    ) {
+
+
+                        var start = null;
+
+                        var animationId;
+
+
+                        function animate(ts) {
+
+
+                            if (!start) {
+
+                                start = ts;
+
+                            }
+
+
+                            var progress =
+
+                                (
+                                    ts -
+                                    start
+                                ) /
+                                1800;
+
+
+                            var opacity =
+
+                                0.35 +
+
+                                (
+                                    0.25 *
+
+                                    (
+                                        0.5 +
+
+                                        0.5 *
+
+                                        Math.sin(
+
+                                            progress *
+                                            Math.PI *
+                                            2
+
+                                        )
+
+                                    )
+
+                                );
+
+
+                            element.css(
+
+                                'opacity',
+
+                                opacity
+
+                            );
+
+
+                            animationId =
+
+                                requestAnimationFrame(
+                                    animate
+                                );
+
+                        }
+
+
+                        animationId =
+
+                            requestAnimationFrame(
+                                animate
+                            );
+
+
+                        scope.$on(
+
+                            '$destroy',
+
+                            function() {
+
+
+                                cancelAnimationFrame(
+                                    animationId
+                                );
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           ANALYTICS FACTORY
+
+           ORIGINAL DATA PRESERVED.
+        ====================================================== */
+
+
+
+
+        /* =====================================================
+           ORIGINAL RISK COLOR FILTER
+
+           PRESERVED.
+        ====================================================== */
+
+        app.filter(
+
+            'riskColor',
+
+            function() {
+
+                return function(val) {
+
+
+                    if (
+                        val > 80
+                    ) {
+
+                        return '#ff4757';
+
+                    }
+
+
+                    if (
+                        val > 50
+                    ) {
+
+                        return '#ffa502';
+
+                    }
+
+
+                    return '#2ed573';
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           ORIGINAL HEATMAP CONTROLLER
+
+           PRESERVED.
+        ====================================================== */
+
+        app.controller(
+
+            'HeatmapController',
+
+            function(
+                $scope,
+                $http
+            ) {
+$scope.hotspots = [];
+        $scope.avgRisk = 0;
+        $scope.activeHotspot = {};
+
+        // Fetch hotspot data from MongoDB through backend
+        $http.get("http://localhost:5000/api/heatmap")
+            .then(function(response) {
+
+                $scope.hotspots = response.data;
+
+                // Calculate average risk from MongoDB data
+                if ($scope.hotspots.length > 0) {
+
+                    var total = 0;
+
+                    $scope.hotspots.forEach(function(spot) {
+                        total += Number(spot.risk) || 0;
+                    });
+
+                    $scope.avgRisk = Math.round(
+                        total / $scope.hotspots.length
+                    );
+
+                    // Select first hotspot
+                    $scope.activeHotspot =
+                        $scope.hotspots[0];
+                }
+
+                console.log(
+                    "Heatmap data loaded:",
+                    $scope.hotspots
+                );
+
+            })
+            .catch(function(error) {
+
+                console.error(
+                    "Failed to fetch heatmap data:",
+                    error
+                );
+
+                alert("Failed to fetch heatmap data.");
+
+            });
+
+
+        // Select hotspot when clicked
+        $scope.selectSpot = function(spot) {
+
+            $scope.activeHotspot = spot;
+
+        };
+
+
+            });
+
+    </script>
+
+</body>
+
+</html>

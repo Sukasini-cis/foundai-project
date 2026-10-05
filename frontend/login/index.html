@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="foundAIApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoundAI - Login</title>
+
+    <!-- AngularJS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-animate/1.8.3/angular-animate.min.js" crossorigin="anonymous"></script>
+
+    <!-- External CSS -->
+    <style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f3f0fb 0%, #eae5f7 50%, #f0eef9 100%);
+  padding: 40px 20px;
+}
+
+.page-frame {
+  position: relative;
+}
+
+/* ================================================================
+   CATCHY ANIMATION — floating aurora blobs behind the login card
+   ================================================================ */
+
+.aurora {
+  position: absolute;
+  inset: -140px;
+  z-index: 0;
+  overflow: hidden;
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.55;
+}
+
+.blob-1 {
+  width: 320px;
+  height: 320px;
+  top: -60px;
+  left: -80px;
+  background: radial-gradient(circle at 30% 30%, #b98af0, transparent 70%);
+  animation: floatBlob1 14s ease-in-out infinite;
+}
+
+.blob-2 {
+  width: 280px;
+  height: 280px;
+  bottom: -90px;
+  right: -60px;
+  background: radial-gradient(circle at 60% 40%, #7b3fe4, transparent 70%);
+  animation: floatBlob2 18s ease-in-out infinite;
+}
+
+.blob-3 {
+  width: 200px;
+  height: 200px;
+  top: 45%;
+  right: 10%;
+  background: radial-gradient(circle at 50% 50%, #5b21c4, transparent 70%);
+  animation: floatBlob3 16s ease-in-out infinite;
+}
+
+@keyframes floatBlob1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(40px, 30px) scale(1.1); }
+}
+
+@keyframes floatBlob2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(-30px, -20px) scale(1.08); }
+}
+
+@keyframes floatBlob3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(20px, -30px) scale(0.94); }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 360px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(90, 60, 160, 0.15);
+  animation: cardIn 0.6s cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.card-header {
+  background: linear-gradient(135deg, #7b3fe4 0%, #5b21c4 100%);
+  padding: 28px 24px 22px;
+  text-align: center;
+  color: #fff;
+}
+
+.logo-badge {
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  font-size: 20px;
+  animation: badgeGlow 2.6s ease-in-out infinite;
+}
+
+@keyframes badgeGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.28); }
+  50%      { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+}
+
+.card-header h1 {
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.card-header p {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.card-body {
+  padding: 24px 24px 20px;
+}
+
+.field-group {
+  margin-bottom: 16px;
+}
+
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #333;
+}
+
+.forgot-link {
+  font-size: 12px;
+  color: #7b3fe4;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.input-wrap {
+  position: relative;
+}
+
+.input-wrap .icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.input-wrap .toggle-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.5;
+  background: none;
+  border: none;
+}
+
+.input-wrap input {
+  width: 100%;
+  padding: 11px 12px 11px 34px;
+  border: 1px solid #e0dcec;
+  border-radius: 8px;
+  font-size: 13.5px;
+  outline: none;
+  transition: border-color 0.15s;
+  background: #fff;
+}
+
+.input-wrap input:focus {
+  border-color: #7b3fe4;
+}
+
+.input-wrap input.ng-invalid.ng-touched {
+  border-color: #e0507a;
+}
+
+.field-error {
+  color: #e0507a;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.field-hint {
+  color: #8a83a3;
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.remember-row input {
+  width: 14px;
+  height: 14px;
+  accent-color: #7b3fe4;
+}
+
+.remember-row span {
+  font-size: 12.5px;
+  color: #444;
+}
+
+.login-btn {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #8b4fe8 0%, #6423d0 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+
+.login-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  animation: btnShimmer 3.2s ease-in-out infinite;
+}
+
+@keyframes btnShimmer {
+  0%       { left: -150%; }
+  60%, 100% { left: 150%; }
+}
+
+.login-btn:hover {
+  opacity: 0.92;
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status-msg {
+  text-align: center;
+  font-size: 12px;
+  margin-bottom: 12px;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.status-msg.error {
+  background: #fdecef;
+  color: #c62b52;
+}
+
+.status-msg.success {
+  background: #eafaf0;
+  color: #1c8a4d;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 14px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e6e2f0;
+}
+
+.divider span {
+  font-size: 10.5px;
+  color: #999;
+  letter-spacing: 0.8px;
+}
+
+.google-btn {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e0dcec;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.google-btn:hover {
+  background: #faf9fc;
+}
+
+.card-footer {
+  text-align: center;
+  padding: 16px 24px;
+  border-top: 1px solid #f0eef7;
+  font-size: 12.5px;
+  color: #555;
+}
+
+.card-footer a {
+  color: #7b3fe4;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.card-footer a:hover {
+  text-decoration: underline;
+}
+
+.page-status {
+  display: flex;
+  gap: 20px;
+  margin-top: 16px;
+  font-size: 11px;
+  color: #777;
+}
+
+.page-status span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2ecc71;
+  display: inline-block;
+}
+
+/* ================================================================
+   DIRECTIVE — passwordStrength
+   ================================================================ */
+
+.pw-strength {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 2px;
+  background: #ece8f6;
+  overflow: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.pw-strength-bar {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  background: #d0447a;
+  transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.pw-strength-bar.weak {
+  background: #e0507a;
+}
+
+.pw-strength-bar.medium {
+  background: #f5a524;
+}
+
+.pw-strength-bar.strong {
+  background: #2ecc71;
+}
+
+.pw-strength-label {
+  margin-top: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #999;
+  text-transform: uppercase;
+}
+
+/* ================================================================
+   DIRECTIVE — shakeOnError
+   ================================================================ */
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+.login-card.shake {
+  animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* ================================================================
+   ANIMATION — ngAnimate hooks for ng-if
+   (status message, field errors, login-button state swap)
+   ================================================================ */
+
+.status-msg.ng-enter {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  opacity: 0;
+  transform: translateY(-6px);
+}
+.status-msg.ng-enter.ng-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.status-msg.ng-leave {
+  transition: opacity 0.2s ease;
+  opacity: 1;
+}
+.status-msg.ng-leave.ng-leave-active {
+  opacity: 0;
+}
+
+.field-error.ng-enter {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  opacity: 0;
+  transform: translateY(-4px);
+}
+.field-error.ng-enter.ng-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.field-error.ng-leave {
+  transition: opacity 0.15s ease;
+  opacity: 1;
+}
+.field-error.ng-leave.ng-leave-active {
+  opacity: 0;
+}
+
+.login-btn span.ng-enter {
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}
+.login-btn span.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+</style>
+</head>
+
+<body ng-controller="LoginController as vm">
+
+<div class="page-frame">
+
+    <div class="aurora" aria-hidden="true">
+        <span class="blob blob-1"></span>
+        <span class="blob blob-2"></span>
+        <span class="blob blob-3"></span>
+    </div>
+
+    <div class="login-card" shake-on-error="vm.shakeTrigger">
+
+        <div class="card-header">
+            <div class="logo-badge">💡</div>
+            <h1>FoundAI</h1>
+            <p>WELCOME BACK</p>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Status Message -->
+            <div class="status-msg"
+                 ng-if="vm.statusText"
+                 ng-class="{ error: !vm.loginSuccess, success: vm.loginSuccess }">
+
+                {{ vm.statusText | statusMessage:vm.loginSuccess }}
+
+            </div>
+
+            <form name="loginForm" novalidate>
+
+                <!-- Email -->
+
+                <div class="field-group">
+
+                    <div class="field-label-row">
+                        <label for="email">College Email Address</label>
+                    </div>
+
+                    <div class="input-wrap">
+                        <span class="icon">✉</span>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="yourname@student.tce.edu"
+                            ng-model="vm.credentials.email"
+                            ng-pattern="vm.collegeEmailPattern"
+                            autofocus-field
+                            required>
+
+                    </div>
+
+                    <div
+                        class="field-error"
+                        ng-if="loginForm.email.$touched && loginForm.email.$error.required">
+
+                        {{ 'please enter your email' | capitalizeFirst }}
+
+                    </div>
+
+                    <div
+                        class="field-error"
+                        ng-if="loginForm.email.$touched && !loginForm.email.$error.required && (loginForm.email.$error.email || loginForm.email.$error.pattern)">
+
+                        {{ 'only student.tce.edu email addresses can log in' | capitalizeFirst }}
+
+                    </div>
+
+                    <div class="field-hint" ng-if="!loginForm.email.$touched || loginForm.email.$valid">
+                        Use your TCE student email 
+                    </div>
+
+                </div>
+
+                <!-- Password -->
+
+                <div class="field-group" password-strength="vm.credentials.password">
+
+                    <div class="field-label-row">
+
+                        <label for="password">Password</label>
+
+                        <a class="forgot-link"
+                           ng-click="vm.forgotPassword()">
+
+                            Forgot Password?
+
+                        </a>
+
+                    </div>
+
+                    <div class="input-wrap">
+
+                        <span class="icon">🔒</span>
+
+                        <input
+                            ng-attr-type="{{ vm.showPassword ? 'text' : 'password' }}"
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            ng-model="vm.credentials.password"
+                            required
+                            minlength="6">
+
+                        <button
+                            type="button"
+                            class="toggle-eye"
+                            ng-click="vm.togglePassword()">
+
+                            {{ vm.showPassword ? '🙈' : '👁' }}
+
+                        </button>
+
+                    </div>
+
+                    <div
+                        class="field-error"
+                        ng-if="loginForm.password.$touched && loginForm.password.$invalid">
+
+                        {{ 'password must be at least 6 characters' | capitalizeFirst }}
+
+                    </div>
+
+                </div>
+
+                
+                <!-- Login -->
+
+                <button
+                    type="submit"
+                    class="login-btn"
+                    ng-click="vm.login()"
+                    ng-disabled="vm.isLoading || loginForm.$invalid">
+
+                    <span ng-if="!vm.isLoading">
+                        Login →
+                    </span>
+
+                    <span ng-if="vm.isLoading">
+                        Logging in…
+                    </span>
+
+                </button>
+
+               
+            </form>
+
+        </div>
+
+        <div class="card-footer">
+
+            Don't have an account?
+
+            <a href="../signup/signup.html">Sign Up</a>
+
+        </div>
+
+    </div>
+
+    <div class="page-status">
+
+        <span>
+
+            <i class="dot"></i>
+
+            AI Engines Operational
+
+        </span>
+
+        <span>
+
+            🛡 Secure Encryption
+
+        </span>
+
+    </div>
+
+</div>
+
+<!-- External JavaScript -->
+
+<script>
+// Create AngularJS Module
+angular.module('foundAIApp', ['ngAnimate'])
+
+/* ======================================================
+   AUTH SERVICE
+====================================================== */
+.service('AuthService', AuthService);
+
+AuthService.$inject = ['$http', '$q', '$timeout', '$log'];
+
+function AuthService($http, $q, $timeout, $log) {
+
+    // Only @student.tce.edu addresses are allowed to authenticate.
+    // Kept here too (not just on the input) so any code path that
+    // calls AuthService.login directly still gets enforced.
+    var COLLEGE_EMAIL_PATTERN = /^[a-zA-Z0-9._%+-]+@student\.tce\.edu$/i;
+
+    this.emailPattern = COLLEGE_EMAIL_PATTERN;
+
+    this.login = function (email, password) {
+
+        email = (email || '').trim();
+
+        if (!COLLEGE_EMAIL_PATTERN.test(email)) {
+            $log.warn('AuthService: rejected non-college email', email);
+            return $q.reject('Only student.tce.edu email addresses can log in.');
+        }
+
+        $log.info('AuthService: login attempt for', email);
+
+        return $http.post('http://localhost:5000/api/auth/login', {
+            email: email,
+            password: password
+        })
+
+        .then(function (response) {
+
+            // Save logged-in user information for other pages (dashboard, etc.)
+            localStorage.setItem(
+                'logged_in',
+                JSON.stringify(response.data.user)
+            );
+
+            return response.data.user;
+
+        })
+
+        .catch(function (error) {
+
+            var message = (error.data && error.data.message)
+                ? error.data.message
+                : 'Invalid email or password';
+
+            return $q.reject(message);
+
+        });
+    };
+
+    this.loginWithGoogle = function () {
+
+        // No backend endpoint for Google login yet — still a demo stub.
+        // NOTE: a real Google sign-in must also restrict by hosted domain
+        // (hd=student.tce.edu in the OAuth request) and re-check the
+        // returned account's email server-side — see the comment below
+        // vm.loginWithGoogle for where that check belongs.
+        var deferred = $q.defer();
+
+        $log.info('AuthService: Google login attempt');
+
+        $timeout(function () {
+
+            deferred.resolve({
+                token: 'google-demo-token',
+                provider: 'google',
+                email: 'demo@student.tce.edu'
+            });
+
+        }, 700);
+
+        return deferred.promise;
+    };
+}
+
+/* ======================================================
+   FILTER : Capitalize First Letter
+====================================================== */
+
+angular.module('foundAIApp')
+
+.filter('capitalizeFirst', function () {
+
+    return function (input) {
+
+        if (!input) return '';
+
+        return input.charAt(0).toUpperCase() + input.slice(1);
+
+    };
+
+})
+
+/* ======================================================
+   FILTER : Status Message
+====================================================== */
+
+.filter('statusMessage', function () {
+
+    return function (input, success) {
+
+        if (!input) return '';
+
+        return success
+            ? ('✓ ' + input)
+            : ('⚠ ' + input);
+
+    };
+
+})
+
+/* ======================================================
+   DIRECTIVES
+====================================================== */
+
+// passwordStrength: reads the plain password value via the bound
+// expression (no ngModel `require` needed since this directive shares
+// the controller's scope) and renders a live strength meter — a bar
+// plus a label — right under the field.
+// Usage: <div class="field-group" password-strength="vm.credentials.password">
+angular.module('foundAIApp')
+
+.directive('passwordStrength', function () {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var wrap = angular.element('<div class="pw-strength"><div class="pw-strength-bar"></div></div>');
+      var label = angular.element('<div class="pw-strength-label"></div>');
+      var bar = wrap.find('div');
+
+      element.append(wrap);
+      element.append(label);
+
+      function evaluate(pw) {
+        pw = pw || '';
+
+        if (!pw) {
+          wrap.css('opacity', 0);
+          bar.attr('class', 'pw-strength-bar');
+          bar.css('width', '0%');
+          label.text('');
+          return;
+        }
+
+        var score = 0;
+        if (pw.length >= 6)              { score++; }
+        if (pw.length >= 10)             { score++; }
+        if (/[A-Z]/.test(pw))            { score++; }
+        if (/[0-9]/.test(pw))            { score++; }
+        if (/[^A-Za-z0-9]/.test(pw))     { score++; }
+
+        var pct, text, cls;
+        if (score <= 1)      { pct = 25;  text = 'Weak';   cls = 'weak'; }
+        else if (score <= 3) { pct = 60;  text = 'Medium';  cls = 'medium'; }
+        else                 { pct = 100; text = 'Strong'; cls = 'strong'; }
+
+        wrap.css('opacity', 1);
+        bar.attr('class', 'pw-strength-bar ' + cls);
+        bar.css('width', pct + '%');
+        label.text(text);
+      }
+
+      scope.$watch(attrs.passwordStrength, evaluate);
+    }
+  };
+})
+
+// shakeOnError: replays a shake animation every time the bound counter
+// changes (a counter, rather than a boolean, so two failures in a row
+// still trigger a fresh shake even though "failed" never toggled off).
+// Usage: <div class="login-card" shake-on-error="vm.shakeTrigger">
+.directive('shakeOnError', function () {
+  return {
+    restrict: 'A',
+    scope: { shakeOnError: '<' },
+    link: function (scope, element) {
+      var isFirst = true;
+
+      scope.$watch('shakeOnError', function () {
+        if (isFirst) { isFirst = false; return; }
+        element.removeClass('shake');
+        void element[0].offsetWidth; // force reflow so the animation can restart
+        element.addClass('shake');
+      });
+    }
+  };
+})
+
+// autofocusField: focuses the element shortly after it links, so the
+// email field is ready to type into as soon as the page loads.
+// Usage: <input autofocus-field ...>
+.directive('autofocusField', ['$timeout', function ($timeout) {
+  return {
+    restrict: 'A',
+    link: function (scope, element) {
+      $timeout(function () {
+        element[0].focus();
+      }, 150);
+    }
+  };
+}])
+
+/* ======================================================
+   CONTROLLER
+====================================================== */
+
+.controller('LoginController', LoginController);
+
+LoginController.$inject = ['AuthService', '$filter', '$window'];
+
+function LoginController(AuthService, $filter, $window) {
+
+    var vm = this;
+
+    // Same pattern the AuthService enforces server-request-side; bound
+    // to the email input via ng-pattern so the form goes invalid (and
+    // the submit button disables) the moment someone types a non-TCE
+    // address.
+    vm.collegeEmailPattern = AuthService.emailPattern;
+
+    vm.credentials = {
+
+        email: '',
+        password: '',
+        rememberMe: false
+
+    };
+
+    vm.showPassword = false;
+
+    vm.isLoading = false;
+
+    vm.statusText = '';
+
+    vm.loginSuccess = false;
+
+    vm.shakeTrigger = 0;
+
+    /* Toggle Password */
+
+    vm.togglePassword = function () {
+
+        vm.showPassword = !vm.showPassword;
+
+    };
+
+    /* Login */
+
+    vm.login = function () {
+
+        vm.isLoading = true;
+
+        vm.statusText = '';
+
+        AuthService.login(
+            vm.credentials.email,
+            vm.credentials.password
+        )
+
+        .then(function (result) {
+
+            vm.loginSuccess = true;
+
+            vm.statusText = 'Logged in as ' + result.email;
+            $window.location.href="../dashboard/dashboard.html";
+
+        })
+
+        .catch(function (errorMsg) {
+
+            vm.loginSuccess = false;
+
+            vm.statusText = errorMsg;
+
+            vm.shakeTrigger++;
+
+        })
+
+        .finally(function () {
+
+            vm.isLoading = false;
+
+        });
+
+    };
+
+    /* Google Login */
+
+    vm.loginWithGoogle = function () {
+
+        vm.isLoading = true;
+
+        AuthService.loginWithGoogle()
+
+        .then(function (result) {
+
+            // Client-side check only. The real enforcement for Google
+            // sign-in has to happen on your backend: restrict the OAuth
+            // consent screen to the student.tce.edu Workspace domain
+            // (hd parameter) AND verify the "hd" / email claim on the
+            // token you get back before creating a session — a user can
+            // bypass anything client-side.
+            if (!vm.collegeEmailPattern.test(result.email || '')) {
+                vm.loginSuccess = false;
+                vm.statusText = 'Only student.tce.edu Google accounts can log in.';
+                vm.shakeTrigger++;
+                return;
+            }
+
+            vm.loginSuccess = true;
+
+            vm.statusText = 'Logged in with Google';
+
+        })
+
+        .finally(function () {
+
+            vm.isLoading = false;
+
+        });
+
+    };
+
+    /* Forgot Password */
+
+    vm.forgotPassword = function () {
+
+        vm.statusText = 'Password reset link would be sent here.';
+
+        vm.loginSuccess = true;
+
+    };
+
+    /* Signup */
+
+    vm.goToSignup = function () {
+
+        vm.statusText = $filter('capitalizeFirst')(
+            'redirecting to sign up…'
+        );
+
+        vm.loginSuccess = true;
+
+    };
+
+}
+</script>
+
+</body>
+</html>

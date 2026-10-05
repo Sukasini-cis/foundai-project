@@ -1,0 +1,11 @@
+{
+  "name": "foundai",
+  "version": "1.0.0",
+  "description": "FoundAI - backend (Express + MongoDB) + frontend (static AngularJS pages), served together",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "npm install --prefix backend"
+  },
+  "license": "ISC"
+}

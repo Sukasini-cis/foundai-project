@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="foundAI">
+<head>
+<meta charset="UTF-8">
+<title>FoundAI — Notifications Hub</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-animate/1.8.3/angular-animate.min.js"></script>
+<style>
+:root{
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel-2:#f4f2fb;
+    --line:#e7e3f5;
+    --text:#0d0a1f;
+    --muted:#5c5877;
+    --purple:#6d3ff2;
+    --purple-dim:#4c2f9e;
+    --purple-light:#8b5cf6;
+    --teal:#22c55e;
+    --amber:#f5a524;
+    --red:#ef4444;
+    --radius:14px;
+}
+*{ box-sizing:border-box; }
+body{
+    margin:0;
+    background:
+        radial-gradient(900px 400px at 85% -10%, rgba(109,63,242,.15), transparent 60%),
+        var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.brand{ font-family:'Space Grotesk','Inter',sans-serif; }
+
+/* ============ Layout ============ */
+.shell{ display:grid; grid-template-columns:230px 1fr; min-height:100vh; }
+
+.sidebar{ background:#fff; border-right:1px solid var(--line); padding:22px 16px; }
+.brand{ display:flex; gap:10px; align-items:center; margin-bottom:26px; padding:0 6px; }
+.brand .dot{
+    width:34px; height:34px; border-radius:10px;
+    background:linear-gradient(135deg,#6d3ff2,#4c2f9e);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-weight:700; flex-shrink:0;
+}
+.brand .name{ font-size:15px; font-weight:600; }
+.brand .tag{ font-size:9px; letter-spacing:.14em; color:var(--muted); }
+
+nav.navlist a{
+    display:flex; align-items:center; gap:11px; padding:10px 12px;
+    margin-bottom:2px; border-radius:9px; text-decoration:none;
+    color:var(--muted); font-size:13.5px; font-weight:500;
+    transition:.2s; cursor:pointer;
+}
+nav.navlist a:hover{ background:#f4f2fb; color:var(--text); }
+nav.navlist a.active{
+    background:rgba(109,63,242,.10); border-left:3px solid var(--purple);
+    color:var(--purple); padding-left:9px;
+}
+nav.navlist a .ic{ width:18px; text-align:center; }
+nav.navlist a .badge{ margin-left:auto; width:7px; height:7px; border-radius:50%; background:var(--purple); }
+.nav-divider{ height:1px; background:var(--line); margin:14px 0; }
+
+main{ padding:22px 26px; overflow-x:hidden; }
+
+/* ============ Top bar ============ */
+.topbar{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:18px; }
+.topbar h1{ margin:0 0 4px; font-size:24px; }
+.topbar p{ margin:0; color:var(--muted); font-size:13px; }
+
+.search-box{
+    display:flex; align-items:center; gap:8px;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+    padding:9px 12px; font-size:12.5px; color:var(--muted); width:320px;
+}
+.search-box input{
+    width:100%; background:transparent; border:0; outline:none;
+    color:var(--text); font-size:12.5px; font-family:inherit;
+}
+.search-box input::placeholder{ color:var(--muted); }
+
+/* ============ Hero notification ============ */
+.hero-card{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    background:rgba(109,63,242,.06); border:1px solid rgba(109,63,242,.18);
+    border-radius:var(--radius); padding:20px; margin-bottom:16px; position:relative; overflow:hidden;
+}
+.hero-card .ic-wrap{
+    width:40px; height:40px; border-radius:10px; background:rgba(109,63,242,.12);
+    display:flex; align-items:center; justify-content:center; margin-right:14px; flex-shrink:0; font-size:18px;
+}
+.hero-card .body{ display:flex; }
+.hero-eyebrow{ font-size:10.5px; letter-spacing:.09em; color:var(--purple); font-weight:700; margin-bottom:4px; }
+.hero-card h3{ margin:0 0 6px; font-size:15px; }
+.hero-card p{ margin:0; font-size:12.5px; color:var(--muted); line-height:1.5; }
+.hero-card .actions{ margin-top:12px; display:flex; gap:10px; }
+
+.btn{
+    border:none; border-radius:8px; padding:9px 16px; font-size:12.5px;
+    font-weight:600; cursor:pointer; transition:.2s;
+}
+.btn-primary{ background:linear-gradient(135deg,#6d3ff2,#4c2f9e); color:#fff; }
+.btn-primary:hover{ transform:translateY(-1px); box-shadow:0 8px 18px rgba(109,63,242,.25); }
+.btn-ghost{ background:var(--panel-2); color:var(--muted); }
+.btn-ghost:hover{ color:var(--text); }
+.btn-outline{
+    background:#fff; border:1px solid var(--line); color:var(--purple);
+}
+.btn-outline:hover{ border-color:var(--purple); }
+
+/* ============ Notification list ============ */
+.notif-item{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:16px 18px; margin-bottom:12px;
+}
+.notif-item .left{ display:flex; gap:14px; }
+.notif-icon{
+    width:34px; height:34px; border-radius:9px; background:var(--panel-2);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:16px;
+}
+.notif-title-row{ display:flex; align-items:center; gap:8px; margin-bottom:4px; }
+.notif-item h4{ margin:0; font-size:14px; color:var(--text); }
+.notif-item p{ margin:0 0 8px; font-size:12px; color:var(--muted); line-height:1.5; max-width:520px; }
+.notif-item .when{ font-size:11px; color:var(--muted); }
+
+.tag{
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:10px; font-weight:700; letter-spacing:.05em;
+}
+.tag-critical{ background:rgba(239,68,68,.12); color:var(--red); }
+.tag-info{ background:rgba(109,63,242,.12); color:var(--purple); }
+
+.notif-item .right{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; }
+
+.empty{ text-align:center; padding:40px 0; color:var(--muted); font-size:13px; }
+
+/* ============================================================
+   ANIMATIONS — ngAnimate hooks + custom directive effects.
+   Nothing above this line was touched; everything below is
+   additive and only fires on elements that already exist
+   (ng-repeat rows, ng-if hero/empty state, nav links, pills).
+============================================================ */
+
+/* --- ng-repeat: notification rows sliding/fading in & out --- */
+.notif-row.ng-enter{
+    transition: 0.35s cubic-bezier(.22,1,.36,1);
+    opacity: 0;
+    transform: translateY(-10px);
+}
+.notif-row.ng-enter.ng-enter-active{
+    opacity: 1;
+    transform: translateY(0);
+}
+.notif-row.ng-leave{
+    transition: 0.25s ease;
+    opacity: 1;
+    max-height: 90px;
+}
+.notif-row.ng-leave.ng-leave-active{
+    opacity: 0;
+    transform: translateX(16px);
+    max-height: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+}
+.notif-row.ng-move{
+    transition: 0.3s ease;
+}
+
+/* --- ng-if: hero card & empty state fading/scaling in --- */
+.hero-card.ng-enter{
+    transition: 0.4s cubic-bezier(.22,1,.36,1);
+    opacity: 0;
+    transform: scale(.97) translateY(-6px);
+}
+.hero-card.ng-enter.ng-enter-active{
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+.hero-card.ng-leave{
+    transition: 0.25s ease;
+    opacity: 1;
+}
+.hero-card.ng-leave.ng-leave-active{
+    opacity: 0;
+    transform: scale(.97);
+}
+.empty.ng-enter{
+    transition: 0.3s ease;
+    opacity: 0;
+}
+.empty.ng-enter.ng-enter-active{
+    opacity: 1;
+}
+
+/* --- ng-class: level tag swapping color smoothly --- */
+.tag{
+    transition: background-color .25s ease, color .25s ease;
+}
+
+/* --- nav link active state + hover glide --- */
+nav.navlist a{
+    position: relative;
+}
+nav.navlist a .ic{
+    display: inline-block;
+    transition: transform .2s ease;
+}
+nav.navlist a:hover .ic{
+    transform: scale(1.15);
+}
+
+/* --- pulseBadge directive: looping notification dot pulse --- */
+.badge.pulse-ring{
+    position: relative;
+}
+.badge.pulse-ring::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--purple);
+    animation: pulse-ring 1.8s cubic-bezier(.4,0,.6,1) infinite;
+}
+@keyframes pulse-ring{
+    0%   { transform: scale(1);   opacity: .7; }
+    70%  { transform: scale(2.6); opacity: 0; }
+    100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* --- rippleBtn directive: material-style click ripple --- */
+.btn{ position: relative; overflow: hidden; }
+.ripple-circle{
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,.55);
+    transform: scale(0);
+    pointer-events: none;
+    animation: ripple-expand .55s ease-out;
+}
+.btn-outline .ripple-circle,
+.btn-ghost .ripple-circle{
+    background: rgba(109,63,242,.25);
+}
+@keyframes ripple-expand{
+    to{
+        transform: scale(2.5);
+        opacity: 0;
+    }
+}
+
+/* --- search box: subtle focus glow --- */
+.search-box{ transition: box-shadow .2s ease, border-color .2s ease; }
+.search-box:focus-within{
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(109,63,242,.12);
+}
+</style>
+</head>
+<body>
+
+<div class="shell" ng-controller="NotificationsController as vm">
+
+  <!-- ================= Sidebar ================= -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="dot">F</div>
+      <div>
+        <span class="name">FoundAI</span>
+        <span class="tag">INTELLIGENT RECOVERY</span>
+      </div>
+    </div>
+    <nav class="navlist">
+      <a href="../dashboard/dashboard.html"><span class="ic">&#9635;</span> Dashboard</a>
+      <a href="../reportlost/reportlost.html"><span class="ic">&#128269;</span> Report Lost</a>
+      <a href="../profile/profile.html"><span class="ic">&#128193;</span> My Reports</a>
+      <a><span class="ic">&#129504;</span> AI Search</a>
+      <a href="../arnavigation.html"><span class="ic">&#128225;</span> AR Navigation</a>
+      <a href="../heatmap.html"><span class="ic">&#128293;</span> AI Lost Heatmap</a>
+      <a href="../admin/reward-escrow.html"><span class="ic">&#128176;</span> Reward Escrow</a>
+      <a href="../messages/messages.html"><span class="ic">&#128172;</span> Messages</a>
+      <a class="active"><span class="ic">&#128276;</span> Notifications <span class="badge" pulse-badge></span></a>
+      <a href="../admin/claims-history.html"><span class="ic">&#128340;</span> Claims History</a>
+      <a href="../admin/admin-mod.html"><span class="ic">&#9881;</span> Admin Mod</a>
+      <a onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='../login/index.html';})(); return false;"><span class="ic">&#9211;</span> Logout</a>
+    </nav>
+  </aside>
+
+  <!-- ================= Main ================= -->
+  <main>
+
+    <div class="topbar">
+      <div>
+        <h1>Notifications Hub</h1>
+        <p>Real-time coordinates verification, matches alerts, and platform announcements.</p>
+      </div>
+      <div class="search-box">
+        <span>&#128269;</span>
+        <input type="text" ng-model="vm.searchQuery" placeholder="Search notifications or reports...">
+      </div>
+    </div>
+
+    <!-- Hero / featured notification -->
+    <div class="hero-card" ng-if="vm.hero">
+      <div class="body">
+        <div class="ic-wrap">&#129520;</div>
+        <div>
+          <div class="hero-eyebrow">AI ACTIVE COORDINATION STATUS</div>
+          <h3>{{ vm.hero.title }}</h3>
+          <p>{{ vm.hero.message }}</p>
+          <div class="actions">
+            <button class="btn btn-primary" ripple-btn ng-click="vm.verifyNow(vm.hero)">Verify Now</button>
+            <button class="btn btn-ghost" ripple-btn ng-click="vm.dismiss(vm.hero)">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification list, filtered via custom filter + built-in filter -->
+    <div class="notif-row" ng-repeat="notif in vm.notifications | filter:vm.searchQuery">
+      <div class="notif-item">
+        <div class="left">
+          <div class="notif-icon">{{ notif.icon }}</div>
+          <div>
+            <div class="notif-title-row">
+              <h4>{{ notif.title }}</h4>
+              <span class="tag" ng-class="notif.level === 'critical' ? 'tag-critical' : 'tag-info'">
+                {{ notif.level | uppercase }}
+              </span>
+            </div>
+            <p>{{ notif.message }}</p>
+            <span class="when">{{ notif.when }}</span>
+          </div>
+        </div>
+        <div class="right">
+          <button class="btn btn-outline" ripple-btn ng-click="vm.handleAction(notif)">{{ notif.actionLabel }}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty" ng-if="(vm.notifications | filter:vm.searchQuery).length === 0">
+      No notifications found.
+    </div>
+
+  </main>
+</div>
+
+<script>
+angular.module('foundAI', ['ngAnimate'])
+
+  /* =========================================================
+     SERVICE — data-access layer, injected into the controller.
+     In production this would wrap $http calls to a real API;
+     here it returns a $q promise so the controller code doesn't
+     have to change when a real backend is wired in.
+  ========================================================= */
+  .service('NotificationService', ['$http', '$q', function ($http, $q) {
+
+    var API_URL = "http://localhost:5000/api/notifications";
+
+    return {
+
+        getNotifications: function () {
+
+            var loggedUser = localStorage.getItem("logged_in");
+
+            if (!loggedUser) {
+                return $q.reject("User is not logged in");
+            }
+
+            var user = JSON.parse(loggedUser);
+
+            return $http.get(API_URL + "/" + user.id)
+                .then(function (response) {
+
+                    return response.data.map(function (notification) {
+
+                        var iconMap = {
+                        critical: "⚠️",
+                        lost: "🧳",
+                        found: "🎉"
+                    };
+
+                    var titleMap = {
+                        critical: "CRITICAL",
+                        lost: "LOST REPORT POSTED",
+                        found: "FOUND REPORT POSTED"
+                    };
+
+                    return {
+                            id: notification._id,
+
+                            icon: iconMap[notification.type] || "🔔",
+
+                            title: titleMap[notification.type]
+                                || (notification.type ? notification.type.toUpperCase() : "Notification"),
+
+                            level: notification.type === "critical"
+                                ? "critical"
+                                : "info",
+
+                            message: notification.message,
+
+                            when: notification.createdAt
+                                ? new Date(notification.createdAt).toLocaleString()
+                                : "Recently",
+
+                            actionLabel: notification.isRead
+                                ? "Read"
+                                : "Mark Read"
+                        };
+
+                    });
+
+                });
+
+        },
+
+        getHeroNotification: function () {
+
+            return $q.resolve(null);
+
+        },
+
+        markAsRead: function (id) {
+
+            return $http.put(
+                API_URL + "/" + id + "/read"
+            );
+
+        }
+
+    };
+
+}])
+
+  /* =========================================================
+     CONTROLLER — depends on $scope and NotificationService via
+     constructor injection (array-annotated form, safe for
+     minification). Binds view state (search query, active
+     filter, notification list) to the view.
+  ========================================================= */
+  .controller('NotificationsController', ['$scope', 'NotificationService',
+    function ($scope, NotificationService) {
+      var vm = this;
+
+      vm.notifications = [];
+      vm.hero = null;
+      vm.searchQuery = '';
+
+      vm.verifyNow = function (heroNotif) {
+    alert('Verifying notification: ' + heroNotif.title);
+};
+
+vm.dismiss = function (heroNotif) {
+    vm.hero = null;
+};
+
+vm.handleAction = function (notif) {
+
+    if (notif.actionLabel === "Mark Read") {
+
+        NotificationService.markAsRead(notif.id)
+            .then(function () {
+
+                notif.actionLabel = "Read";
+
+                alert("Notification marked as read.");
+
+            })
+            .catch(function (error) {
+
+                console.error("Failed to mark notification:", error);
+
+                alert("Failed to update notification.");
+
+            });
+
+    } else {
+
+        alert(notif.actionLabel + ' → ' + notif.title);
+
+    }
+};
+
+     function init() {
+
+    NotificationService.getNotifications()
+        .then(function (data) {
+
+            vm.notifications = data;
+
+            console.log("MongoDB notifications:", data);
+
+        })
+        .catch(function (error) {
+
+            console.error("Notification loading error:", error);
+
+            vm.notifications = [];
+
+        });
+
+    NotificationService.getHeroNotification()
+        .then(function (data) {
+
+            vm.hero = data;
+
+        });
+
+}
+
+      init();
+    }
+  ]);
+
+/* =========================================================
+   DIRECTIVE — pulseBadge
+   Purely presentational. Adds a looping CSS pulse animation
+   (see .pulse-ring in notifi.css) to the little unread dot
+   next to "Notifications" in the sidebar. Doesn't touch any
+   existing scope/state, just decorates the element.
+========================================================= */
+angular.module('foundAI')
+  .directive('pulseBadge', function () {
+    return {
+      restrict: 'A',
+      link: function (scope, element) {
+        element.addClass('pulse-ring');
+      }
+    };
+  })
+
+  /* =========================================================
+     DIRECTIVE — rippleBtn
+     Adds a Material-style click ripple to any button it's
+     placed on, purely via DOM/CSS — no scope bindings, so it
+     layers on top of existing ng-click handlers untouched.
+  ========================================================= */
+  .directive('rippleBtn', function () {
+    return {
+      restrict: 'A',
+      link: function (scope, element) {
+        element.on('click', function (e) {
+          var btn = element[0];
+          var circle = document.createElement('span');
+          var diameter = Math.max(btn.clientWidth, btn.clientHeight);
+          var rect = btn.getBoundingClientRect();
+
+          circle.style.width = circle.style.height = diameter + 'px';
+          circle.style.left = (e.clientX - rect.left - diameter / 2) + 'px';
+          circle.style.top = (e.clientY - rect.top - diameter / 2) + 'px';
+          circle.className = 'ripple-circle';
+
+          var oldRipple = btn.querySelector('.ripple-circle');
+          if (oldRipple) { oldRipple.remove(); }
+
+          btn.appendChild(circle);
+
+          circle.addEventListener('animationend', function () {
+            circle.remove();
+          });
+        });
+      }
+    };
+  });
+</script>
+</body>
+</html>

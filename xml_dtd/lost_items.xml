@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE lostItems SYSTEM "lost_items.dtd">
+
+<lostItems>
+
+    <item>
+        <name>Black Wallet</name>
+       
+        <category>Accessories</category>
+        <date>2026-09-10</date>
+        <status>Lost</status>
+    </item>
+
+    <item>
+        <name>Blue Water Bottle</name>
+        <owner>Arun</owner>
+        <category>Personal Items</category>
+        <date>2026-09-11</date>
+        <status>Lost</status>
+    </item>
+
+    <item>
+        <name>College ID Card</name>
+        <owner>Vaishnavi</owner>
+        <category>Documents</category>
+        <date>2026-09-12</date>
+        <status>Lost</status>
+    </item>
+
+</lostItems>

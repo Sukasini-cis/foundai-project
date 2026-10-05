@@ -1,0 +1,1737 @@
+
+<!DOCTYPE html>
+<html ng-app="foundAiApp">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FoundAI | AR Navigation</title>
+
+    <!-- =====================================================
+         ANGULARJS
+    ====================================================== -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+
+    <!-- AngularJS ngAnimate -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <style>
+
+        /* =====================================================
+           ORIGINAL CSS
+           Existing visual design retained.
+           No CSS @keyframes are used.
+        ====================================================== */
+
+        :root {
+            --bg-dark: #ffffff;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --accent: #6437d6;
+            --accent-light: #eee8ff;
+            --text-main: #111827;
+            --text-dim: #5f6280;
+            --border: #e5def4;
+            --page-bg: #ffffff;
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family: 'Segoe UI', sans-serif;
+
+            background: var(--bg-dark);
+
+            color: white;
+
+            overflow: hidden;
+
+        }
+
+
+        .app-container {
+
+            display: flex;
+
+            height: 100vh;
+
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ====================================================== */
+
+        .sidebar {
+    width: 270px;
+    background: #ffffff;
+    padding: 28px 18px;
+    border-right: 1px solid #e5def4;
+    display: flex;
+    flex-direction: column;
+}
+.logo {
+    font-weight: 700;
+    margin: 0 0 28px 6px;
+    font-size: 18px;
+    color: #111827;
+    line-height: 1.1;
+}
+ .logo::before {
+    content: "◎";
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin-right: 10px;
+    vertical-align: middle;
+    border-radius: 11px;
+    background: #6437d6;
+    color: white;
+    font-size: 22px;
+    box-shadow: 0 4px 12px rgba(100, 55, 214, 0.25);
+}     
+
+        .logo small {
+    margin-left: 53px;
+    margin-top: -5px;
+    color: #5f4b91 !important;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+}
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+        }
+
+        .nav-item {
+            padding: 12px 14px;
+            color: #4f526b;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+.nav-item:hover {
+    background: #f4f0ff;
+    color: #6437d6;
+}
+
+        
+
+        .nav-item.active {
+            background: #eee8ff;
+            color: #6437d6;
+        }
+.sidebar-icon {
+    width: 28px;
+    margin-right: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #5d6078;
+    flex-shrink: 0;
+}
+
+.nav-item.active .sidebar-icon {
+    color: #6437d6;
+}
+
+.nav-item:hover .sidebar-icon {
+    color: #6437d6;
+}
+
+/* Messages notification dot */
+.update-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #6437d6;
+    margin-left: auto;
+}
+        
+
+
+        /* =====================================================
+           MAIN AREA
+        ====================================================== */
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--page-bg);
+            color: var(--text-main);
+        }
+
+
+        .header {
+            height: 78px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+
+
+        .dest-label {
+
+            font-size: 10px;
+
+            color: var(--text-dim);
+
+            letter-spacing: 1px;
+
+        }
+
+
+        .dest-value {
+
+            color: var(--accent);
+
+            font-weight: 500;
+
+            margin: 0;
+
+        }
+
+
+        .user-profile {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            font-size: 12px;
+
+            text-align: right;
+
+        }
+
+
+        .user-profile img {
+
+            width: 35px;
+
+            border-radius: 50%;
+
+            border: 2px solid var(--accent);
+
+        }
+
+
+        /* =====================================================
+           SPLIT VIEW
+        ====================================================== */
+
+        .nav-grid {
+
+            display: flex;
+
+            flex: 1;
+
+        }
+
+
+        .map-pane {
+            flex: 1;
+            background: #ffffff;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+
+        .map-view {
+
+            flex: 1;
+
+            background: #fdfdfd;
+
+            border-radius: 12px;
+
+            position: relative;
+
+            overflow: hidden;
+
+            background-image:
+                radial-gradient(
+                    #e0e0e0 1px,
+                    transparent 1px
+                );
+
+            background-size: 20px 20px;
+
+        }
+
+
+        .map-label {
+
+            position: absolute;
+
+            background: white;
+
+            color: #aaa;
+
+            padding: 8px;
+
+            border: 1px solid #eee;
+
+            border-radius: 4px;
+
+            font-size: 9px;
+
+            font-weight: bold;
+
+        }
+
+
+        .path-line {
+
+            position: absolute;
+
+            top: 50%;
+
+            left: 30%;
+
+            width: 200px;
+
+            border-top: 5px dotted var(--accent);
+
+            transform: rotate(20deg);
+
+        }
+
+
+        /* =====================================================
+           AR VIEW
+        ====================================================== */
+
+        .ar-pane {
+
+            flex: 1;
+
+            position: relative;
+
+            background:
+                url(
+                    'https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1000'
+                )
+                center/cover;
+
+        }
+
+
+        .ar-overlay {
+
+            position: absolute;
+
+            top: 20px;
+
+            left: 20px;
+
+            right: 20px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+        }
+
+
+        .badge {
+
+            background: rgba(0,0,0,0.7);
+
+            padding: 5px 12px;
+
+            border-radius: 4px;
+
+            font-size: 10px;
+
+        }
+
+
+        .accuracy {
+
+            background: rgba(10, 50, 40, 0.85);
+
+            color: #2ecc71;
+
+            border: 1px solid #145a32;
+
+        }
+
+
+        /* =====================================================
+           WAYPOINT
+        ====================================================== */
+
+        .waypoint {
+
+            position: absolute;
+
+            top: 50%;
+
+            right: 20%;
+
+            transform:
+                translate(-50%, -50%);
+
+            text-align: center;
+
+        }
+
+
+        .pin {
+
+            width: 45px;
+
+            height: 45px;
+
+            border: 3px solid var(--accent);
+
+            border-radius: 50%;
+
+            background: rgba(124, 77, 255, 0.3);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-weight: bold;
+
+            box-shadow:
+                0 0 20px var(--accent);
+
+        }
+
+
+        /* =====================================================
+           ITEM INFO CARD
+        ====================================================== */
+
+        .info-card {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            box-shadow: 0 8px 24px rgba(50, 35, 90, 0.10);
+        }
+
+
+        .item-row {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
+
+        }
+
+
+        .status-pill {
+            margin-left: auto;
+            background: var(--accent-light);
+            color: var(--accent);
+            font-size: 10px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+
+        .btn-main {
+
+            flex: 1;
+
+            background: var(--accent);
+
+            border: none;
+
+            color: white;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        /* =====================================================
+           ANIMATION ELEMENT
+           
+           Used by radarPulse directive.
+           The actual pulse is generated by JavaScript.
+        ====================================================== */
+
+        .radar-ring {
+
+            width: 45px;
+
+            height: 45px;
+
+            border-radius: 50%;
+
+            position: absolute;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform:
+                translate(-50%, -50%);
+
+            pointer-events: none;
+
+        }
+
+    </style>
+
+</head>
+
+
+<body ng-controller="NavigationController">
+
+
+    <div class="app-container">
+
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside class="sidebar">
+
+    <div class="logo">
+        FoundAI
+        <small style="
+            display:block;
+            font-size:8px;
+            color:var(--text-dim);
+        ">
+            INTELLIGENT RECOVERY
+        </small>
+    </div>
+
+    <ul class="nav-list">
+
+        <li class="nav-item" onclick="window.location.href='dashboard/dashboard.html'">
+            <span class="sidebar-icon">▦</span>
+            Dashboard
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='reportlost/reportlost.html'">
+            <span class="sidebar-icon">⚑</span>
+            Report Lost
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='profile/profile.html'">
+            <span class="sidebar-icon">📁</span>
+            My Reports
+        </li>
+
+        <li class="nav-item">
+            <span class="sidebar-icon">✦</span>
+            AI Search
+        </li>
+
+        <li class="nav-item active">
+            <span class="sidebar-icon">🧭</span>
+            AR Navigation
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='heatmap.html'">
+            <span class="sidebar-icon">🔥</span>
+            AI Lost Heatmap
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='admin/reward-escrow.html'">
+            <span class="sidebar-icon">🛡</span>
+            Reward Escrow
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='messages/messages.html'">
+            <span class="sidebar-icon">✉</span>
+            Messages
+            <span class="update-dot"></span>
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='notifi/notifi.html'">
+            <span class="sidebar-icon">🔔</span>
+            Notifications
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='admin/claims-history.html'">
+            <span class="sidebar-icon">📜</span>
+            Claims History
+        </li>
+
+        <li class="nav-item" onclick="window.location.href='admin/admin-mod.html'">
+            <span class="sidebar-icon">⚙</span>
+            Admin Mod
+        </li>
+
+        <li class="nav-item" onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='login/index.html';})(); return false;">
+            <span class="sidebar-icon">⏻</span>
+            Logout
+        </li>
+
+    </ul>
+
+</aside>
+
+
+        <!-- =================================================
+             MAIN AREA
+        ================================================== -->
+
+        <main class="main-content">
+
+
+            <!-- HEADER -->
+
+            <header class="header">
+
+                <div>
+
+                    <span class="dest-label">
+                        DESTINATION
+                    </span>
+
+                    <p class="dest-value">
+
+                        <i class="fas fa-map-marker-alt"></i>
+
+                        {{navData.destination.building}}
+
+                        ({{navData.destination.lab}})
+
+                    </p>
+
+                </div>
+
+
+                </header>
+
+
+            <!-- =================================================
+                 NAVIGATION GRID
+                 
+                 ngAnimate staggered entrance
+            ================================================== -->
+
+            <div class="nav-grid">
+
+
+                <!-- =================================================
+                     LEFT: MAP
+                ================================================== -->
+
+                <section
+                    class="map-pane stagger-item"
+                    data-index="0">
+
+
+                    <h4 style="margin:0 0 10px 0">
+
+                        Campus Geospatial Map
+
+                    </h4>
+
+
+                    <div class="map-view">
+
+                        <div
+                            class="map-label"
+                            style="top:20%; left:10%">
+
+                            MAIN
+
+                        </div>
+
+
+                        <div
+                            class="map-label"
+                            style="bottom:20%; right:15%">
+
+                            SCIENCE HALL
+
+                        </div>
+
+
+                        <div class="path-line"></div>
+
+                    </div>
+
+
+                    <div
+                        style="
+                            display:flex;
+                            justify-content:space-between;
+                            align-items:center;
+                            margin-top:15px;
+                        ">
+
+
+                        <div style="font-size:11px;">
+
+                            <span style="color:#666">
+
+                                SIGNAL QUALITY
+
+                            </span>
+
+                            <br>
+
+
+                            <i
+                                class="fas fa-wifi"
+                                style="color:#2ecc71">
+                            </i>
+
+                            {{navData.signal.type}}
+
+                        </div>
+
+
+                        <!-- pulseClick added -->
+
+                        <button
+    class="badge"
+    pulse-click
+    style="
+        background:#ffffff;
+        border:1px solid #6437d6;
+        color:#6437d6;
+        cursor:pointer;
+        padding:8px 14px;
+        border-radius:8px;
+        font-weight:600;
+    "
+    ng-click="recalibrate()">
+
+    Recalibrate
+
+</button>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                     RIGHT: AR VIEW
+                ================================================== -->
+
+                <section
+                    class="ar-pane stagger-item"
+                    data-index="1">
+
+
+                    <div class="ar-overlay">
+
+
+                        <span class="badge">
+
+                            RADAR_SWEEP_ACTIVE
+
+                        </span>
+
+
+                        <div
+                            class="badge accuracy">
+
+                            TRACKING ACCURACY:
+
+                            <!-- countUp directive -->
+
+                            <strong
+                                count-up="{{navData.trackedItem.accuracy}}"
+                                count-up-decimals="1">
+
+                                0.0
+
+                            </strong>%
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         WAYPOINT
+                         
+                         radarPulse custom directive
+                    ================================================== -->
+
+                    <div class="waypoint">
+
+                        <!-- JS radar pulse -->
+
+                        <div
+                            class="radar-ring"
+                            radar-pulse>
+                        </div>
+
+
+                        <div class="pin">
+
+                            15m
+
+                        </div>
+
+
+                        <div
+                            style="
+                                font-size:10px;
+                                margin-top:5px;
+                            ">
+
+                            Target Waypoint
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         BOTTOM CARD
+                    ================================================== -->
+
+                    <div
+                        class="info-card stagger-item"
+                        data-index="2">
+
+
+                        <div class="item-row">
+
+
+                            <i
+                                class="fas fa-headphones"
+                                style="
+                                    font-size:24px;
+                                    color:var(--accent)
+                                ">
+
+                            </i>
+
+
+                            <div>
+
+                                <h4 style="margin:0">
+
+                                    {{navData.trackedItem.name}}
+
+                                </h4>
+
+
+                                <small style="color:#888">
+
+                                    Last seen
+
+                                    {{navData.trackedItem.lastSeen | timeAgo}}
+
+                                    •
+
+                                    {{navData.trackedItem.location}}
+
+                                </small>
+
+                            </div>
+
+
+                            <span class="status-pill">
+
+                                {{navData.trackedItem.status}}
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- pulseClick added -->
+
+                        <button
+                            class="btn-main"
+                            pulse-click
+                            ng-click="startNavigation()">
+
+                            <i class="fas fa-paper-plane"></i>
+
+                            {{isNavigating
+                                ? 'NAVIGATING...'
+                                : 'START NAVIGATION'}}
+
+                        </button>
+
+                    </div>
+
+
+                </section>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- =====================================================
+         ANGULARJS LOGIC
+    ====================================================== -->
+
+    <script>
+
+
+        /* =====================================================
+           1. MODULE
+
+           Original module:
+           foundAiApp
+
+           Added:
+           ngAnimate
+        ====================================================== */
+
+        var app = angular.module(
+            'foundAiApp',
+            ['ngAnimate']
+        );
+
+
+        /* =====================================================
+           2. ngAnimate STAGGERED ENTRANCE
+
+           Required by EX-5.
+
+           Uses:
+           - opacity
+           - translateY
+           - requestAnimationFrame
+           - 80ms stagger
+           - 450ms duration
+
+           No CSS @keyframes.
+           No CSS transition.
+        ====================================================== */
+
+        app.animation(
+            '.stagger-item',
+            function() {
+
+                return {
+
+                    enter: function(
+                        element,
+                        doneFn
+                    ) {
+
+
+                        var index =
+                            parseInt(
+                                element.attr(
+                                    'data-index'
+                                )
+                            ) || 0;
+
+
+                        var delay =
+                            index * 80;
+
+
+                        var duration = 450;
+
+
+                        /*
+                         * Initial state
+                         */
+
+                        element.css(
+                            'opacity',
+                            0
+                        );
+
+
+                        element.css(
+                            'transform',
+                            'translateY(16px)'
+                        );
+
+
+                        /*
+                         * Stagger delay
+                         */
+
+                        setTimeout(
+                            function() {
+
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+                                        Math.min(
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+                                            1
+                                        );
+
+
+                                    /*
+                                     * Fade in
+                                     */
+
+                                    element.css(
+                                        'opacity',
+                                        progress
+                                    );
+
+
+                                    /*
+                                     * Move upward
+                                     */
+
+                                    element.css(
+                                        'transform',
+                                        'translateY(' +
+
+                                        (
+                                            16 *
+                                            (
+                                                1 -
+                                                progress
+                                            )
+                                        ) +
+
+                                        'px)'
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+                                            'transform',
+                                            'translateY(0px)'
+                                        );
+
+
+                                        doneFn();
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+
+                            },
+                            delay
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           3. CUSTOM DIRECTIVE
+              radarPulse
+
+           Continuous JS pulse around the waypoint.
+
+           No CSS keyframes.
+        ====================================================== */
+
+        app.directive(
+            'radarPulse',
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element
+                    ) {
+
+
+                        var duration = 1600;
+
+
+                        function loop(ts) {
+
+
+                            /*
+                             * Progress continuously
+                             * cycles from 0 to 1.
+                             */
+
+                            var progress =
+                                (
+                                    ts %
+                                    duration
+                                ) /
+                                duration;
+
+
+                            /*
+                             * Ring expands.
+                             */
+
+                            var spread =
+                                14 *
+                                progress;
+
+
+                            /*
+                             * Ring fades.
+                             */
+
+                            var opacity =
+                                0.5 *
+                                (
+                                    1 -
+                                    progress
+                                );
+
+
+                            /*
+                             * JS-controlled
+                             * box shadow.
+                             */
+
+                            element.css(
+                                'box-shadow',
+
+                                '0 0 0 ' +
+
+                                spread +
+
+                                'px rgba(124,77,255,' +
+
+                                opacity +
+
+                                ')'
+                            );
+
+
+                            requestAnimationFrame(
+                                loop
+                            );
+
+                        }
+
+
+                        requestAnimationFrame(
+                            loop
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           4. CUSTOM DIRECTIVE
+              pulseClick
+
+           Used on:
+           - Recalibrate
+           - Start Navigation
+
+           JS scale feedback.
+        ====================================================== */
+
+        app.directive(
+            'pulseClick',
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element
+                    ) {
+
+
+                        element.on(
+                            'click',
+                            function() {
+
+
+                                var duration = 220;
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+                                        Math.min(
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+                                            1
+                                        );
+
+
+                                    var scale;
+
+
+                                    /*
+                                     * Scale down during
+                                     * first half.
+                                     */
+
+                                    if (
+                                        progress < 0.5
+                                    ) {
+
+
+                                        scale =
+                                            1 -
+                                            (
+                                                0.06 *
+                                                (
+                                                    progress /
+                                                    0.5
+                                                )
+                                            );
+
+
+                                    }
+
+                                    /*
+                                     * Return to normal.
+                                     */
+
+                                    else {
+
+
+                                        scale =
+                                            0.94 +
+                                            (
+                                                0.06 *
+                                                (
+                                                    (
+                                                        progress -
+                                                        0.5
+                                                    ) /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+
+                                    element.css(
+                                        'transform',
+                                        'scale(' +
+                                        scale +
+                                        ')'
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+                                            'transform',
+                                            'scale(1)'
+                                        );
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+                            }
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           5. CUSTOM DIRECTIVE
+              countUp
+
+           Used for:
+           Tracking Accuracy
+
+           Supports decimal values.
+        ====================================================== */
+
+        app.directive(
+            'countUp',
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        function animateTo(
+                            target
+                        ) {
+
+
+                            var decimals =
+                                parseInt(
+                                    attrs.countUpDecimals
+                                ) || 0;
+
+
+                            var start = 0;
+
+                            var duration = 800;
+
+                            var startTime = null;
+
+
+                            function step(ts) {
+
+
+                                if (!startTime) {
+
+                                    startTime = ts;
+
+                                }
+
+
+                                var progress =
+                                    Math.min(
+                                        (
+                                            ts -
+                                            startTime
+                                        ) /
+                                        duration,
+                                        1
+                                    );
+
+
+                                var value =
+                                    start +
+                                    (
+                                        target -
+                                        start
+                                    ) *
+                                    progress;
+
+
+                                element.text(
+                                    value.toFixed(
+                                        decimals
+                                    )
+                                );
+
+
+                                if (
+                                    progress < 1
+                                ) {
+
+
+                                    requestAnimationFrame(
+                                        step
+                                    );
+
+                                }
+
+                            }
+
+
+                            requestAnimationFrame(
+                                step
+                            );
+
+                        }
+
+
+                        /*
+                         * Watch the AngularJS
+                         * expression.
+                         */
+
+                        attrs.$observe(
+                            'countUp',
+                            function(newVal) {
+
+
+                                var num =
+                                    parseFloat(
+                                        newVal
+                                    );
+
+
+                                if (
+                                    !isNaN(num)
+                                ) {
+
+
+                                    animateTo(
+                                        num
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           6. EXISTING FACTORY
+           
+           Functionality preserved.
+        ====================================================== */
+
+        app.factory(
+            'NavigationFactory',
+            function() {
+
+
+                /*
+                 * Existing navigation data.
+                 */
+
+                var itemData = {
+
+                    destination: {
+
+                        building:
+                            "Science Building, Wing B",
+
+                        lab:
+                            "Lab 402"
+
+                    },
+
+
+                    trackedItem: {
+
+                        name:
+                            "Blue Headphones",
+
+                        lastSeen:
+                            new Date(
+                                Date.now() -
+                                7200000
+                            ),
+
+                        location:
+                            "Near Lab 402",
+
+                        status:
+                            "In Range",
+
+                        accuracy:
+                            98.4
+
+                    },
+
+
+                    signal: {
+
+                        type:
+                            "High-Accuracy BLE Beacon (3 nodes)"
+
+                    }
+
+                };
+
+
+                /*
+                 * Existing Factory API.
+                 */
+
+                return {
+
+
+                    /*
+                     * READ DATA
+                     */
+
+                    getData:
+                        function() {
+
+                            return itemData;
+
+                        },
+
+
+                    /*
+                     * UPDATE ACCURACY
+                     */
+
+                    updateAccuracy:
+                        function(newVal) {
+
+                            itemData
+                                .trackedItem
+                                .accuracy =
+                                newVal;
+
+                        }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           7. EXISTING timeAgo FILTER
+           
+           Preserved exactly.
+        ====================================================== */
+
+        app.filter(
+            'timeAgo',
+            function() {
+
+                return function(date) {
+
+
+                    var hours =
+                        Math.floor(
+                            (
+                                new Date() -
+                                date
+                            ) /
+                            3600000
+                        );
+
+
+                    return (
+                        hours +
+                        " hours ago"
+                    );
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           8. EXISTING CONTROLLER
+           
+           Existing functionality preserved:
+           - User data
+           - NavigationFactory
+           - startNavigation()
+           - recalibrate()
+        ====================================================== */
+
+        app.controller(
+            'NavigationController',
+            function(
+                $scope,
+                NavigationFactory
+            ) {
+
+
+                /*
+                 * Existing user information.
+                 */
+
+                $scope.user = {
+
+                    name:
+                        "Priya Sharma",
+
+                    type:
+                        "Premium User"
+
+                };
+
+
+                /*
+                 * Existing Factory data.
+                 */
+
+                $scope.navData =
+                    NavigationFactory.getData();
+
+
+                /*
+                 * Existing navigation state.
+                 */
+
+                $scope.isNavigating =
+                    false;
+
+
+                /*
+                 * Existing Start Navigation
+                 * functionality.
+                 */
+
+                $scope.startNavigation =
+                    function() {
+
+
+                        $scope.isNavigating =
+                            !$scope.isNavigating;
+
+                    };
+
+
+                /*
+                 * Existing Recalibrate
+                 * functionality.
+                 */
+
+                $scope.recalibrate =
+                    function() {
+
+
+                        alert(
+                            "Recalibrating via NavigationFactory..."
+                        );
+
+
+                        /*
+                         * Existing Factory update.
+                         */
+
+                        NavigationFactory
+                            .updateAccuracy(
+                                99.9
+                            );
+
+                    };
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
+

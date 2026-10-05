@@ -1,0 +1,10 @@
+<!ELEMENT lostItems (item+)>
+
+<!ELEMENT item (name, owner, category, date, status, description?)>
+
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT owner (#PCDATA)>
+<!ELEMENT category (#PCDATA)>
+<!ELEMENT date (#PCDATA)>
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT description (#PCDATA)>

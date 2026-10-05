@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="adminLoginApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoundAI - Admin Login</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #faf9ff;
+            color: #111827;
+            min-height: 100vh;
+        }
+
+        /* =========================
+           TOP BRANDING
+        ========================= */
+
+        .top-bar {
+            height: 76px;
+            background: #ffffff;
+            border-bottom: 1px solid #e5def4;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            background: #6437d6;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-right: 11px;
+            box-shadow: 0 4px 12px rgba(100, 55, 214, 0.25);
+        }
+
+        .brand-text {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .brand-subtitle {
+            display: block;
+            color: #5f4b91;
+            font-size: 8px;
+            letter-spacing: 1.2px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* =========================
+           MAIN LOGIN AREA
+        ========================= */
+
+        .login-wrapper {
+            min-height: calc(100vh - 76px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .login-card {
+            width: 430px;
+            max-width: 100%;
+            background: #ffffff;
+            border: 1px solid #e5def4;
+            border-radius: 18px;
+            padding: 38px;
+            box-shadow: 0 12px 35px rgba(61, 43, 112, 0.08);
+        }
+
+        .admin-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 15px;
+            background: #eee8ff;
+            color: #6437d6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 20px;
+        }
+
+        .login-title {
+            text-align: center;
+            margin: 0;
+            font-size: 25px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .login-description {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 9px 0 30px;
+        }
+
+        /* =========================
+           FORM
+        ========================= */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 46px;
+            border: 1px solid #ddd6ee;
+            border-radius: 10px;
+            background: #faf9ff;
+            padding: 0 14px;
+            font-size: 14px;
+            color: #111827;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #6437d6;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(100, 55, 214, 0.10);
+        }
+
+        .password-input {
+            padding-right: 70px;
+        }
+
+        .show-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #6437d6;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* =========================
+           LOGIN BUTTON
+        ========================= */
+
+        .login-button {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            background: #6437d6;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: 0.2s;
+        }
+
+        .login-button:hover {
+            background: #5529c2;
+            box-shadow: 0 6px 16px rgba(100, 55, 214, 0.25);
+        }
+
+        .login-button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        /* =========================
+           ERROR
+        ========================= */
+
+        .error-message {
+            margin-top: 16px;
+            padding: 11px 13px;
+            border-radius: 9px;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #be123c;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            color: #8b87a0;
+            font-size: 11px;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #f1edff;
+            color: #6437d6;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 600px) {
+
+            .top-bar {
+                padding: 0 20px;
+            }
+
+            .login-card {
+                padding: 28px 22px;
+            }
+        }
+    </style>
+</head>
+
+<body ng-controller="AdminLoginController">
+
+    <!-- TOP BRANDING -->
+    <header class="top-bar">
+        <div class="brand">
+
+            <div class="brand-icon">
+                ◎
+            </div>
+
+            <div class="brand-text">
+                FoundAI
+                <span class="brand-subtitle">
+                    INTELLIGENT RECOVERY
+                </span>
+            </div>
+
+        </div>
+    </header>
+
+
+    <!-- LOGIN AREA -->
+    <main class="login-wrapper">
+
+        <div class="login-card">
+
+            <!-- ADMIN ICON -->
+            <div class="admin-icon">
+                ⚙
+            </div>
+
+            <h1 class="login-title">
+                Admin Login
+            </h1>
+
+            <p class="login-description">
+                Sign in to access the FoundAI administration module.
+            </p>
+
+
+            <!-- USERNAME -->
+            <div class="form-group">
+
+                <label class="form-label">
+                    Admin Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    class="form-input"
+                    placeholder="Enter admin username"
+                    ng-model="credentials.username"
+                    autocomplete="username"
+                >
+
+            </div>
+
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+
+                <label class="form-label">
+                    Password
+                </label>
+
+                <div class="input-wrapper">
+
+                    <input
+                         id="password"
+                        ng-attr-type="{{showPassword ? 'text' : 'password'}}"
+                        class="form-input password-input"
+                        placeholder="Enter password"
+                        ng-model="credentials.password"
+                        autocomplete="current-password"
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        ng-click="showPassword = !showPassword">
+
+                        {{ showPassword ? 'Hide' : 'Show' }}
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- LOGIN BUTTON -->
+            <button
+                 id="loginBtn"
+                class="login-button"
+                ng-click="login()"
+                ng-disabled="loading">
+
+                {{ loading ? 'Signing in...' : 'Sign In' }}
+
+            </button>
+
+
+            <!-- ERROR -->
+            <div
+                class="error-message"
+                ng-if="errorMessage">
+
+                {{ errorMessage }}
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="login-footer">
+
+                Authorized personnel only
+
+                <div class="admin-badge">
+                    ADMIN ACCESS
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- ANGULAR -->
+    <script>
+
+        var app = angular.module("adminLoginApp", []);
+
+        app.controller("AdminLoginController", function($scope) {
+
+            $scope.credentials = {
+                username: "",
+                password: ""
+            };
+
+            $scope.showPassword = false;
+            $scope.loading = false;
+            $scope.errorMessage = "";
+
+
+            $scope.login = function() {
+
+                $scope.errorMessage = "";
+
+                if (!$scope.credentials.username ||
+                    !$scope.credentials.password) {
+
+                    $scope.errorMessage =
+                        "Please enter both username and password.";
+
+                    return;
+                }
+
+
+                /*
+                 * TEMPORARY LOGIN
+                 *
+                 * We will replace this with the
+                 * Node.js + MongoDB authentication API.
+                 */
+
+                if (
+                    $scope.credentials.username === "admin" &&
+                    $scope.credentials.password === "admin123"
+                ) {
+
+                    $scope.loading = true;
+
+                    /*
+                     * Replace this redirect with
+                     * your actual Admin Module page.
+                     */
+
+                    sessionStorage.setItem("foundaiAdminAuthenticated", "true");
+                    sessionStorage.setItem("foundaiAdminUser", $scope.credentials.username);
+                    window.location.href = "admin-mod.html";
+
+                } else {
+
+                    $scope.errorMessage =
+                        "Invalid admin username or password.";
+                }
+            };
+
+        });
+
+    </script>
+
+</body>
+</html>

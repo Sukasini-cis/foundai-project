@@ -1,0 +1,2250 @@
+
+<!DOCTYPE html>
+<html ng-app="escrowApp">
+
+<head>
+
+    <title>FoundAI | Shared Escrow Logic</title>
+
+    <!-- =====================================================
+         ANGULARJS
+    ====================================================== -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+
+    <!-- AngularJS ngAnimate -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <style>
+
+        :root {
+
+            --primary: #7c4dff;
+
+            --bg: #f8f9fc;
+
+            --border: #e2e8f0;
+
+            --text: #2c3e50;
+
+            --success: #00b894;
+
+            --danger: #ff7675;
+
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family: 'Segoe UI', sans-serif;
+
+            background: var(--bg);
+
+            color: var(--text);
+
+            padding: 40px;
+
+        }
+
+
+        /* =====================================================
+           PAGE HEADER
+        ====================================================== */
+
+        .page-header {
+
+            text-align: center;
+
+            margin-bottom: 40px;
+
+        }
+
+
+        .page-header h1 {
+
+            margin-bottom: 8px;
+
+        }
+
+
+        .secure-indicator {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 7px;
+
+            font-size: 10px;
+
+            color: var(--success);
+
+            font-weight: bold;
+
+            letter-spacing: 1px;
+
+        }
+
+
+        .secure-dot {
+
+            width: 7px;
+
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--success);
+
+        }
+
+
+        /* =====================================================
+           MAIN GRID
+        ====================================================== */
+
+        .grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1.5fr;
+
+            gap: 30px;
+
+        }
+
+
+        /* =====================================================
+           CARD
+        ====================================================== */
+
+        .card {
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 12px;
+
+            border: 1px solid var(--border);
+
+            box-shadow:
+                0 4px 6px rgba(0,0,0,0.05);
+
+            position: relative;
+
+            overflow: hidden;
+
+        }
+
+
+        .card h2 {
+
+            margin-top: 0;
+
+            color: var(--primary);
+
+            font-size: 18px;
+
+            border-bottom:
+                2px solid var(--bg);
+
+            padding-bottom: 10px;
+
+        }
+
+
+        /* =====================================================
+           FORM
+        ====================================================== */
+
+        input,
+        select {
+
+            width: 100%;
+
+            padding: 10px;
+
+            margin: 10px 0;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 6px;
+
+            outline: none;
+
+        }
+
+
+        /*
+         * No CSS transition.
+         * Button animation is handled by JS.
+         */
+
+        .btn {
+
+            border: none;
+
+            padding: 12px;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+
+            width: 100%;
+
+        }
+
+
+        .btn-primary {
+
+            background: var(--primary);
+
+            color: white;
+
+        }
+
+
+        .btn-success {
+
+            background: var(--success);
+
+            color: white;
+
+            margin-top: 10px;
+
+        }
+
+
+        .btn-danger {
+
+            background: none;
+
+            color: var(--danger);
+
+            width: auto;
+
+            padding: 5px;
+
+        }
+
+
+        /* =====================================================
+           ESCROW CONTRACT CARD
+        ====================================================== */
+
+        .item-card {
+
+            border:
+                1px solid var(--bg);
+
+            padding: 15px;
+
+            margin-bottom: 15px;
+
+            border-radius: 8px;
+
+            position: relative;
+
+            background: white;
+
+        }
+
+
+        .tag {
+
+            font-size: 9px;
+
+            padding: 3px 7px;
+
+            border-radius: 4px;
+
+            background: #f0ebff;
+
+            color: var(--primary);
+
+            font-weight: bold;
+
+        }
+
+
+        /* =====================================================
+           VAULT STATUS
+        ====================================================== */
+
+        .vault-status {
+
+            margin-top: 20px;
+
+            padding-top: 15px;
+
+            border-top:
+                2px solid var(--bg);
+
+        }
+
+
+        .vault-icon {
+
+            width: 38px;
+
+            height: 38px;
+
+            border-radius: 50%;
+
+            background: #f0ebff;
+
+            color: var(--primary);
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-right: 8px;
+
+        }
+
+
+        .vault-amount {
+
+            font-size: 22px;
+
+            font-weight: 800;
+
+            color: var(--primary);
+
+            display: inline-block;
+
+        }
+
+
+        /* =====================================================
+           EMPTY STATE
+        ====================================================== */
+
+        .empty-state {
+
+            text-align: center;
+
+            padding: 25px;
+
+            color: #ccc;
+
+        }
+
+
+        .empty-state i {
+
+            font-size: 30px;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        /* =====================================================
+           EXTRA ANIMATION ELEMENT
+        ====================================================== */
+
+        .security-line {
+
+            position: absolute;
+
+            left: -100%;
+
+            top: 0;
+
+            width: 100%;
+
+            height: 2px;
+
+            background: var(--primary);
+
+            opacity: 0.35;
+
+            pointer-events: none;
+
+        }
+
+
+        /* =====================================================
+           CONTRACT STATUS
+        ====================================================== */
+
+        .contract-status {
+
+            font-size: 9px;
+
+            color: var(--success);
+
+            font-weight: bold;
+
+            margin-top: 5px;
+
+        }
+
+
+        /* =====================================================
+           DASHBOARD-STYLE SIDEBAR
+           Only the three requested pages are shown.
+        ====================================================== */
+
+        body {
+            padding-left: 308px;
+        }
+
+        .foundai-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 268px;
+            height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid #e5e1f5;
+            padding: 28px 18px;
+            z-index: 1000;
+            box-sizing: border-box;
+        }
+
+        .foundai-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 4px 28px 4px;
+        }
+
+        .foundai-logo-mark {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: #5b2dcc;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            box-shadow: 0 0 0 6px #eee9ff;
+            flex-shrink: 0;
+        }
+
+        .foundai-logo-name {
+            font-size: 18px;
+            line-height: 20px;
+            color: #111111;
+            font-weight: 700;
+        }
+
+        .foundai-logo-subtitle {
+            font-size: 9px;
+            line-height: 12px;
+            letter-spacing: 1.5px;
+            color: #5b2dcc;
+            font-weight: 600;
+        }
+
+        .foundai-nav {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .foundai-nav-item {
+            height: 44px;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            color: #46516a;
+            font-size: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .foundai-nav-item:hover {
+            background: #f4f0ff;
+        }
+
+        .foundai-nav-item.active {
+            background: #eee8ff;
+            color: #6535dc;
+            font-weight: 600;
+            border-left: 3px solid #6d3df2;
+            padding-left: 11px;
+        }
+
+        .foundai-nav-icon {
+            width: 22px;
+            margin-right: 12px;
+            text-align: center;
+            display: inline-block;
+            font-size: 15px;
+        }
+
+        /* Dashboard-matching individual icon colours */
+        .foundai-admin-icon {
+            color: #7f8794;
+        }
+
+        .foundai-escrow-icon {
+            color: #9aa2ad;
+        }
+
+        .foundai-claims-icon {
+            color: #f4a261;
+        }
+
+        @media (max-width: 900px) {
+            .foundai-sidebar {
+                width: 220px;
+            }
+
+            body {
+                padding-left: 250px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+    <script>
+        // FoundAI admin-session guard: no database required for this demo login.
+        (function () {
+            if (sessionStorage.getItem("foundaiAdminAuthenticated") !== "true") {
+                window.location.replace("admin-login.html");
+            }
+        })();
+    </script>
+
+
+    <!-- =====================================================
+         FOUND AI DASHBOARD-STYLE SIDEBAR
+         Only: Admin Mod, Reward Escrow, Claims History
+    ====================================================== -->
+
+    <aside class="foundai-sidebar">
+
+        <div class="foundai-logo">
+            <div class="foundai-logo-mark">
+                <i class="fas fa-bullseye"></i>
+            </div>
+
+            <div>
+                <div class="foundai-logo-name">FoundAI</div>
+                <div class="foundai-logo-subtitle">INTELLIGENT RECOVERY</div>
+            </div>
+        </div>
+
+        <nav>
+            <ul class="foundai-nav">
+
+                <li>
+                    <a class="foundai-nav-item" href="admin-mod.html">
+                        <span class="foundai-nav-icon foundai-admin-icon">
+                            <i class="fas fa-cog"></i>
+                        </span>
+                        Admin Mod
+                    </a>
+                </li>
+
+                <li>
+                    <a class="foundai-nav-item active" href="reward-escrow.html">
+                        <span class="foundai-nav-icon foundai-escrow-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </span>
+                        Reward Escrow
+                    </a>
+                </li>
+
+                <li>
+                    <a class="foundai-nav-item" href="claims-history.html">
+                        <span class="foundai-nav-icon foundai-claims-icon">
+                            <span style="font-size:15px;">📜</span>
+                        </span>
+                        Claims History
+                    </a>
+                </li>
+
+                <li>
+                    <a class="foundai-nav-item" href="../dashboard/dashboard.html">
+                        <span class="foundai-nav-icon">
+                            <i class="fas fa-th-large"></i>
+                        </span>
+                        Back to Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a class="foundai-nav-item" href="#" onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='../login/index.html';})(); return false;">
+                        <span class="foundai-nav-icon">
+                            <i class="fas fa-power-off"></i>
+                        </span>
+                        Logout
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </aside>
+
+
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="page-header extra-enter">
+
+        <h1>
+
+            Finder Bounty Escrow System
+
+        </h1>
+
+
+        <div class="secure-indicator">
+
+            <span class="secure-dot"></span>
+
+            SECURE SHARED FACTORY ACTIVE
+
+        </div>
+
+    </div>
+
+
+    <div class="grid">
+
+
+        <!-- =================================================
+             SECTION 1:
+             USER DEPOSITOR PANEL
+             
+             Controller One
+        ================================================== -->
+
+        <div
+            class="card extra-enter"
+
+            ng-controller="UserDepositorController">
+
+
+            <div class="security-line"></div>
+
+
+            <h2>
+
+                <i class="fas fa-user-plus"></i>
+
+                Step 1: User Deposit
+
+            </h2>
+
+
+            <p
+                style="
+                    font-size:12px;
+                    color:#777;
+                ">
+
+                Controller One:
+                Responsible for creating new escrow contracts.
+
+            </p>
+
+
+            <label>
+
+                Asset to Protect:
+
+            </label>
+
+
+            <input
+
+                type="text"
+
+                ng-model="form.asset"
+
+                placeholder="e.g. MacBook Pro"
+
+            >
+
+
+            <label>
+
+                Bounty Amount ($):
+
+            </label>
+
+
+            <input
+
+                type="number"
+
+                ng-model="form.amount"
+
+                placeholder="e.g. 150"
+
+            >
+
+
+            <!-- =============================================
+                 ORIGINAL FUNCTION:
+                 createDeposit()
+
+                 Added:
+                 pulse-click
+            ============================================== -->
+
+            <button
+
+                class="btn btn-primary"
+
+                pulse-click
+
+                ng-click="createDeposit()"
+
+            >
+
+                <i class="fas fa-lock"></i>
+
+                Lock Reward in Vault
+
+            </button>
+
+
+            <div
+                style="
+                    margin-top:15px;
+                    font-size:10px;
+                    color:#999;
+                ">
+
+                <i class="fas fa-shield-alt"></i>
+
+                Funds remain protected until admin verification.
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SECTION 2:
+             ADMIN ESCROW PANEL
+             
+             Controller Two
+        ================================================== -->
+
+        <div
+
+            class="card extra-enter"
+
+            ng-controller="AdminEscrowController"
+
+
+        >
+
+            <div class="security-line"></div>
+
+
+            <h2>
+
+                <i class="fas fa-user-shield"></i>
+
+                Step 2: Admin Handshake
+
+            </h2>
+
+
+            <p
+                style="
+                    font-size:12px;
+                    color:#777;
+                ">
+
+                Controller Two:
+                Responsible for verification, payouts, and deletion.
+
+            </p>
+
+
+            <!-- =================================================
+                 EMPTY STATE
+                 
+                 Existing ng-if preserved.
+            ================================================== -->
+
+            <div
+
+                ng-if="contracts.length == 0"
+
+                class="empty-state"
+
+            >
+
+                <i class="fas fa-vault"></i>
+
+
+                <div>
+
+                    No active contracts in the factory.
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CONTRACT LIST
+                 
+                 ngAnimate staggered entrance
+            ================================================== -->
+
+            <div
+
+                class="item-card stagger-item"
+
+                ng-repeat="item in contracts"
+
+                data-index="{{$index}}"
+
+            >
+
+
+                <!-- =================================================
+                     ESCROW IDENTIFIER
+                ================================================== -->
+
+                <span class="tag">
+
+                    SECURE ESCROW:
+
+                    #{{item.id | limitTo:-6 | uppercase}}
+
+                </span>
+
+
+                <div
+                    class="contract-status">
+
+                    <i class="fas fa-circle-check"></i>
+
+                    FUNDS LOCKED IN VAULT
+
+                </div>
+
+
+                <h3
+                    style="
+                        margin:8px 0 5px 0;
+                    ">
+
+                    {{item.asset}}
+
+                </h3>
+
+
+                <div
+                    style="
+                        font-size:20px;
+                        font-weight:bold;
+                    ">
+
+                    {{item.amount | currency}}
+
+                </div>
+
+
+                <!-- =================================================
+                     UPDATE:
+                     VERIFY + PAY
+                     
+                     pulseClick
+                ================================================== -->
+
+                <button
+
+                    class="btn btn-success"
+
+                    pulse-click
+
+                    ng-click="verifyAndPay(item)"
+
+                >
+
+                    <i class="fas fa-check-double"></i>
+
+                    Verify & Release Payout
+
+                </button>
+
+
+                <!-- =================================================
+                     DELETE
+                     
+                     pulseClick
+                ================================================== -->
+
+                <button
+
+                    class="btn btn-danger"
+
+                    pulse-click
+
+                    ng-click="cancel(item.id)"
+
+                    style="
+                        position:absolute;
+                        top:15px;
+                        right:15px;
+                    "
+
+                    title="Cancel Escrow"
+
+                >
+
+                    <i class="fas fa-trash"></i>
+
+                </button>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 TOTAL PAYOUT
+                 
+                 flashOnChange
+            ================================================== -->
+
+            <div
+
+                class="vault-status"
+
+                flash-on-change="{{stats.released}}"
+
+            >
+
+                <span class="vault-icon">
+
+                    <i class="fas fa-vault"></i>
+
+                </span>
+
+
+                <span>
+
+                    <small
+                        style="
+                            display:block;
+                            color:#777;
+                            font-size:9px;
+                            font-weight:bold;
+                        ">
+
+                        TOTAL VAULT PAYOUTS
+
+                    </small>
+
+
+                    <span
+
+                        class="vault-amount"
+
+                        count-up="{{stats.released}}"
+
+                        count-up-decimals="0"
+
+                    >
+
+                        0
+
+                    </span>
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================================
+         ANGULARJS
+    ========================================================== -->
+
+    <script>
+
+
+        /* =====================================================
+           1. APPLICATION MODULE
+
+           Existing:
+           escrowApp
+
+           Added:
+           ngAnimate
+        ====================================================== */
+
+        var app = angular.module(
+
+            'escrowApp',
+
+            ['ngAnimate']
+
+        );
+
+
+
+        /* =====================================================
+           2. NG-ANIMATE STAGGERED ENTRANCE
+
+           Required EX-5 animation.
+
+           Contract cards enter:
+
+           opacity:
+           0 -> 1
+
+           translateY:
+           16px -> 0
+
+           scale:
+           0.98 -> 1
+
+           Delay:
+           80ms per card.
+
+           Duration:
+           450ms.
+
+           Uses requestAnimationFrame.
+        ====================================================== */
+
+        app.animation(
+
+            '.stagger-item',
+
+            function() {
+
+                return {
+
+                    enter: function(
+                        element,
+                        doneFn
+                    ) {
+
+
+                        var index =
+
+                            parseInt(
+
+                                element.attr(
+                                    'data-index'
+                                )
+
+                            ) || 0;
+
+
+                        var delay =
+
+                            index * 80;
+
+
+                        var duration = 450;
+
+
+                        /*
+                         * Initial state.
+                         */
+
+                        element.css(
+                            'opacity',
+                            0
+                        );
+
+
+                        element.css(
+                            'transform',
+                            'translateY(16px) scale(0.98)'
+                        );
+
+
+                        setTimeout(
+
+                            function() {
+
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+
+                                        Math.min(
+
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+
+                                            1
+
+                                        );
+
+
+                                    /*
+                                     * Smooth ease-out.
+                                     */
+
+                                    var eased =
+
+                                        1 -
+
+                                        Math.pow(
+
+                                            1 -
+                                            progress,
+
+                                            3
+
+                                        );
+
+
+                                    element.css(
+
+                                        'opacity',
+
+                                        eased
+
+                                    );
+
+
+                                    element.css(
+
+                                        'transform',
+
+                                        'translateY(' +
+
+                                        (
+                                            16 *
+                                            (
+                                                1 -
+                                                eased
+                                            )
+                                        ) +
+
+                                        'px) scale(' +
+
+                                        (
+                                            0.98 +
+                                            (
+                                                0.02 *
+                                                eased
+                                            )
+                                        ) +
+
+                                        ')'
+
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+
+                                            'transform',
+
+                                            'translateY(0px) scale(1)'
+
+                                        );
+
+
+                                        doneFn();
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+
+                            },
+
+                            delay
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           3. EXTRA PAGE ENTRANCE
+
+           The two controller panels and heading
+           enter with a subtle scale + fade effect.
+
+           This is an additional catchy effect.
+        ====================================================== */
+
+        app.animation(
+
+            '.extra-enter',
+
+            function() {
+
+                return {
+
+                    enter: function(
+                        element,
+                        doneFn
+                    ) {
+
+
+                        var duration = 500;
+
+                        var start = null;
+
+
+                        element.css(
+                            'opacity',
+                            0
+                        );
+
+
+                        element.css(
+
+                            'transform',
+
+                            'translateY(12px) scale(0.97)'
+
+                        );
+
+
+                        function step(ts) {
+
+
+                            if (!start) {
+
+                                start = ts;
+
+                            }
+
+
+                            var progress =
+
+                                Math.min(
+
+                                    (
+                                        ts -
+                                        start
+                                    ) /
+                                    duration,
+
+                                    1
+
+                                );
+
+
+                            var eased =
+
+                                1 -
+
+                                Math.pow(
+
+                                    1 -
+                                    progress,
+
+                                    3
+
+                                );
+
+
+                            element.css(
+                                'opacity',
+                                eased
+                            );
+
+
+                            element.css(
+
+                                'transform',
+
+                                'translateY(' +
+
+                                (
+                                    12 *
+                                    (
+                                        1 -
+                                        eased
+                                    )
+                                ) +
+
+                                'px) scale(' +
+
+                                (
+                                    0.97 +
+                                    (
+                                        0.03 *
+                                        eased
+                                    )
+                                ) +
+
+                                ')'
+
+                            );
+
+
+                            if (
+                                progress < 1
+                            ) {
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+
+                            }
+
+                            else {
+
+
+                                element.css(
+
+                                    'transform',
+
+                                    'translateY(0px) scale(1)'
+
+                                );
+
+
+                                doneFn();
+
+                            }
+
+                        }
+
+
+                        requestAnimationFrame(
+                            step
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           4. pulseClick DIRECTIVE
+
+           Used for:
+
+           - Lock Reward
+           - Verify & Release
+           - Delete
+
+           Effect:
+
+           scale 1
+             ↓
+           scale 0.94
+             ↓
+           scale 1
+
+           Duration:
+           220ms.
+        ====================================================== */
+
+        app.directive(
+
+            'pulseClick',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element
+                    ) {
+
+
+                        element.on(
+
+                            'click',
+
+                            function() {
+
+
+                                var duration = 220;
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+
+                                        Math.min(
+
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+
+                                            1
+
+                                        );
+
+
+                                    var scale;
+
+
+                                    if (
+                                        progress < 0.5
+                                    ) {
+
+
+                                        scale =
+
+                                            1 -
+
+                                            (
+                                                0.06 *
+                                                (
+                                                    progress /
+                                                    0.5
+                                                )
+                                            );
+
+
+                                    }
+
+                                    else {
+
+
+                                        scale =
+
+                                            0.94 +
+
+                                            (
+                                                0.06 *
+                                                (
+                                                    (
+                                                        progress -
+                                                        0.5
+                                                    ) /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+
+                                    element.css(
+
+                                        'transform',
+
+                                        'scale(' +
+                                        scale +
+                                        ')'
+
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+
+                                            'transform',
+
+                                            'scale(1)'
+
+                                        );
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           5. flashOnChange DIRECTIVE
+
+           Watches:
+
+           stats.released
+
+           Whenever payout is released:
+
+           $4,500
+               ↓
+           $4,650
+
+           The vault payout area briefly
+           scales up and returns.
+        ====================================================== */
+
+        app.directive(
+
+            'flashOnChange',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        var firstChange = true;
+
+
+                        attrs.$observe(
+
+                            'flashOnChange',
+
+                            function() {
+
+
+                                if (
+                                    firstChange
+                                ) {
+
+
+                                    firstChange =
+                                        false;
+
+
+                                    return;
+
+                                }
+
+
+                                var duration = 350;
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+
+                                        Math.min(
+
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+
+                                            1
+
+                                        );
+
+
+                                    var scale;
+
+
+                                    if (
+                                        progress < 0.5
+                                    ) {
+
+
+                                        scale =
+
+                                            1 +
+
+                                            (
+                                                0.10 *
+                                                (
+                                                    progress /
+                                                    0.5
+                                                )
+                                            );
+
+
+                                    }
+
+                                    else {
+
+
+                                        scale =
+
+                                            1.10 -
+
+                                            (
+                                                0.10 *
+                                                (
+                                                    (
+                                                        progress -
+                                                        0.5
+                                                    ) /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+
+                                    element.css(
+
+                                        'transform',
+
+                                        'scale(' +
+                                        scale +
+                                        ')'
+
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+
+                                            'transform',
+
+                                            'scale(1)'
+
+                                        );
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           6. countUp DIRECTIVE
+
+           Used on:
+
+           Total Vault Payouts
+
+           Example:
+
+           0 -> 4500
+
+           Duration:
+           800ms.
+
+           Uses requestAnimationFrame.
+        ====================================================== */
+
+        app.directive(
+
+            'countUp',
+
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        function animateTo(
+                            target
+                        ) {
+
+
+                            var duration = 800;
+
+                            var startValue = 0;
+
+                            var startTime = null;
+
+
+                            var decimals =
+
+                                parseInt(
+
+                                    attrs.countUpDecimals
+
+                                ) || 0;
+
+
+                            function step(ts) {
+
+
+                                if (!startTime) {
+
+                                    startTime = ts;
+
+                                }
+
+
+                                var progress =
+
+                                    Math.min(
+
+                                        (
+                                            ts -
+                                            startTime
+                                        ) /
+                                        duration,
+
+                                        1
+
+                                    );
+
+
+                                /*
+                                 * Smooth count.
+                                 */
+
+                                var eased =
+
+                                    1 -
+
+                                    Math.pow(
+
+                                        1 -
+                                        progress,
+
+                                        3
+
+                                    );
+
+
+                                var value =
+
+                                    startValue +
+
+                                    (
+                                        target -
+                                        startValue
+                                    ) *
+                                    eased;
+
+
+                                element.text(
+
+                                    value.toFixed(
+                                        decimals
+                                    )
+
+                                );
+
+
+                                if (
+                                    progress < 1
+                                ) {
+
+
+                                    requestAnimationFrame(
+                                        step
+                                    );
+
+                                }
+
+                            }
+
+
+                            requestAnimationFrame(
+                                step
+                            );
+
+                        }
+
+
+                        attrs.$observe(
+
+                            'countUp',
+
+                            function(
+                                newValue
+                            ) {
+
+
+                                var number =
+
+                                    parseFloat(
+                                        newValue
+                                    );
+
+
+                                if (
+                                    !isNaN(number)
+                                ) {
+
+
+                                    animateTo(
+                                        number
+                                    );
+
+                                }
+
+                            }
+
+                        );
+
+                    }
+
+                };
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           7. EXISTING ESCROW FACTORY
+           
+           FUNCTIONALITY RETAINED.
+           
+           ADD
+           UPDATE
+           DELETE
+        ====================================================== */
+app.factory('EscrowFactory', function($http) {
+
+    var stats = {
+        released: 0
+    };
+
+    return {
+
+        // Get active escrow contracts
+        getContracts: function() {
+            return $http.get('http://localhost:5000/api/escrow');
+        },
+
+        // Get payout statistics
+        getStats: function() {
+            return $http.get('http://localhost:5000/api/escrow/stats');
+        },
+
+        // Create a new escrow deposit
+        addContract: function(asset, amount) {
+            return $http.post(
+                'http://localhost:5000/api/escrow',
+                {
+                    asset: asset,
+                    amount: amount
+                }
+            );
+        },
+
+        // Release payout
+        releaseToFinder: function(item) {
+            return $http.put(
+                'http://localhost:5000/api/escrow/' + item.id
+            );
+        },
+
+        // Cancel escrow
+        deleteById: function(id) {
+            return $http.delete(
+                'http://localhost:5000/api/escrow/' + id
+            );
+        }
+    };
+});
+
+
+
+        /* =====================================================
+           8. CONTROLLER ONE
+           
+           USER DEPOSITOR
+           
+           Existing logic retained.
+        ====================================================== */
+
+        var UserCtrl =
+
+            function(
+                $scope,
+                EscrowFactory
+            ) {$scope.form = {
+        asset: '',
+        amount: 0
+    };
+
+    $scope.createDeposit = function() {
+
+        if (!$scope.form.asset || $scope.form.amount <= 0) {
+            return;
+        }
+
+        EscrowFactory
+            .addContract(
+                $scope.form.asset,
+                $scope.form.amount
+            )
+            .then(function(response) {
+
+                alert("Reward locked successfully!");
+
+                $scope.form = {
+                    asset: '',
+                    amount: 0
+                };
+
+                // Notify other controller/page to refresh
+                $scope.$emit('escrowUpdated');
+
+            })
+            .catch(function(error) {
+
+                console.error("Escrow creation failed:", error);
+
+                alert("Failed to lock reward.");
+
+            });
+    };
+
+};
+
+
+
+                
+
+
+        /*
+         * Explicit injection retained.
+         */
+
+        UserCtrl.$inject = [
+
+            '$scope',
+
+            'EscrowFactory'
+
+        ];
+
+
+        app.controller(
+
+            'UserDepositorController',
+
+            UserCtrl
+
+        );
+
+
+
+        /* =====================================================
+           9. CONTROLLER TWO
+           
+           ADMIN
+           
+           Existing logic retained.
+        ====================================================== */
+
+        var AdminCtrl =
+
+            function(
+                $scope,
+                EscrowFactory
+            ) {
+
+$scope.contracts = [];
+
+    $scope.stats = {
+        released: 0
+    };
+
+
+    // Load active escrow contracts
+    $scope.loadContracts = function() {
+
+        EscrowFactory
+            .getContracts()
+            .then(function(response) {
+
+                $scope.contracts = response.data;
+
+            })
+            .catch(function(error) {
+
+                console.error(
+                    "Failed to fetch escrow contracts:",
+                    error
+                );
+
+                alert("Failed to fetch escrow contracts.");
+
+            });
+    };
+
+
+    // Load payout statistics
+    $scope.loadStats = function() {
+
+        EscrowFactory
+            .getStats()
+            .then(function(response) {
+
+                $scope.stats.released =
+                    Number(response.data.released) || 0;
+
+            })
+            .catch(function(error) {
+
+                console.error(
+                    "Failed to fetch escrow statistics:",
+                    error
+                );
+
+            });
+    };
+
+
+    // Verify and release payout
+    $scope.verifyAndPay = function(item) {
+
+        if (confirm("Confirm physical handshake verified?")) {
+
+            EscrowFactory
+                .releaseToFinder(item)
+                .then(function(response) {
+
+                    alert("Payout released successfully!");
+
+                    $scope.loadContracts();
+                    $scope.loadStats();
+
+                })
+                .catch(function(error) {
+
+                    console.error(
+                        "Payout release failed:",
+                        error
+                    );
+
+                    alert("Failed to release payout.");
+
+                });
+        }
+    };
+
+
+    // Cancel escrow
+    $scope.cancel = function(id) {
+
+        if (confirm("Cancel this escrow contract?")) {
+
+            EscrowFactory
+                .deleteById(id)
+                .then(function(response) {
+
+                    alert("Escrow cancelled successfully!");
+
+                    $scope.loadContracts();
+
+                })
+                .catch(function(error) {
+
+                    console.error(
+                        "Escrow cancellation failed:",
+                        error
+                    );
+
+                    alert("Failed to cancel escrow.");
+
+                });
+        }
+    };
+
+
+    // Initial loading
+    $scope.loadContracts();
+    $scope.loadStats();
+
+
+    // Refresh when a new deposit is created
+    $scope.$on('escrowUpdated', function() {
+
+        $scope.loadContracts();
+        $scope.loadStats();
+
+    });
+
+};
+
+
+        /*
+         * Explicit injection retained.
+         */
+
+        AdminCtrl.$inject = [
+
+            '$scope',
+
+            'EscrowFactory'
+
+        ];
+
+
+        app.controller(
+
+            'AdminEscrowController',
+
+            AdminCtrl
+
+        );
+
+    </script>
+
+</body>
+
+</html>
+

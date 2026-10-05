@@ -1,0 +1,2028 @@
+
+<!DOCTYPE html>
+<html ng-app="claimsApp">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>FoundAI | Claims History Management</title>
+
+
+    <!-- =====================================================
+         ANGULARJS
+    ====================================================== -->
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+
+    <!-- AngularJS ngAnimate -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+
+
+    <!-- FontAwesome -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <style>
+
+        /* =====================================================
+           ORIGINAL PAGE STYLING
+        ====================================================== */
+
+        :root {
+
+            --primary: #7c4dff;
+
+            --bg-light: #f8f9fc;
+
+            --sidebar: #ffffff;
+
+            --text-dark: #2c3e50;
+
+            --text-muted: #7f8c8d;
+
+            --success: #27ae60;
+
+            --danger: #e74c3c;
+
+            --border: #e1e8ed;
+
+        }
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family: 'Segoe UI', sans-serif;
+
+            background: var(--bg-light);
+
+            color: var(--text-dark);
+
+        }
+
+
+        .app-container {
+
+            display: flex;
+
+            height: 100vh;
+
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ====================================================== */
+
+        .sidebar {
+
+            width: 220px;
+
+            background: var(--sidebar);
+
+            border-right: 1px solid var(--border);
+
+            padding: 20px;
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        .logo {
+
+            font-weight: bold;
+
+            font-size: 18px;
+
+            color: var(--primary);
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .nav-item {
+
+            padding: 12px;
+
+            color: var(--text-muted);
+
+            cursor: pointer;
+
+            border-radius: 8px;
+
+            margin-bottom: 5px;
+
+            list-style: none;
+
+            font-size: 14px;
+
+        }
+
+
+        .nav-item i {
+
+            margin-right: 12px;
+
+            width: 18px;
+
+        }
+        .sidebar .nav-item:nth-child(1) i {
+    color: #7f8794;       /* Admin Mod - grey */
+}
+
+.sidebar .nav-item:nth-child(2) i {
+    color: #b7bec9;       /* Reward Escrow - light grey */
+}
+
+.sidebar .nav-item:nth-child(3) i {
+    color: #f4a261;       /* Claims History - orange */
+}
+
+
+        .nav-item.active {
+
+            background: #f0ebff;
+
+            color: var(--primary);
+
+            font-weight: 500;
+
+        }
+
+
+        /* =====================================================
+           MAIN CONTENT
+        ====================================================== */
+
+        .main-content {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            display: flex;
+
+            flex-direction: column;
+
+        }
+
+
+        .top-nav {
+
+            height: 70px;
+
+            background: white;
+
+            border-bottom: 1px solid var(--border);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 0 30px;
+
+        }
+
+
+        .search-box {
+
+            background: #f1f3f5;
+
+            border: none;
+
+            padding: 10px 15px;
+
+            border-radius: 6px;
+
+            width: 300px;
+
+        }
+
+
+        /* =====================================================
+           CONTENT
+        ====================================================== */
+
+        .content-body {
+
+            padding: 40px;
+
+            max-width: 1000px;
+
+            margin: 0 auto;
+
+            width: 100%;
+
+        }
+
+
+        /* =====================================================
+           ADD CLAIM FORM
+        ====================================================== */
+
+        .add-claim-form {
+
+            background: white;
+
+            padding: 20px;
+
+            border-radius: 12px;
+
+            border: 1px solid var(--border);
+
+            margin-bottom: 25px;
+
+            display: flex;
+
+            gap: 10px;
+
+            align-items: center;
+
+        }
+
+
+        .add-claim-form input {
+
+            padding: 10px;
+
+            border: 1px solid var(--border);
+
+            border-radius: 6px;
+
+            flex: 1;
+
+            outline: none;
+
+        }
+
+
+        .add-claim-form input:focus {
+
+            border-color: var(--primary);
+
+        }
+
+
+        /* =====================================================
+           PAGE HEADER
+        ====================================================== */
+
+        .page-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: flex-start;
+
+            margin-bottom: 30px;
+
+        }
+
+
+        .btn-handshake {
+
+            background: var(--primary);
+
+            color: white;
+
+            border: none;
+
+            padding: 10px 18px;
+
+            border-radius: 6px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+        }
+
+
+        /* =====================================================
+           PLATFORM INDEX CARD
+        ====================================================== */
+
+        .index-card {
+
+            background: white;
+
+            border: 1px solid #d1f2eb;
+
+            border-radius: 12px;
+
+            padding: 25px;
+
+            margin-bottom: 30px;
+
+            position: relative;
+
+        }
+
+
+        .progress-bar-bg {
+
+            background: #f1f3f5;
+
+            height: 10px;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+
+            margin: 15px 0;
+
+        }
+
+
+        /*
+         * IMPORTANT:
+         *
+         * Removed CSS transition from the progress bar.
+         * Required animation behavior is handled by JS
+         * directives / requestAnimationFrame.
+         */
+
+        .progress-fill {
+
+            background: var(--success);
+
+            height: 100%;
+
+            width: 100%;
+
+        }
+
+
+        /* =====================================================
+           ARCHIVAL RECORDS
+        ====================================================== */
+
+        .record-card {
+
+            background: white;
+
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+
+            padding: 15px 25px;
+
+            margin-bottom: 12px;
+
+            display: flex;
+
+            align-items: center;
+
+        }
+
+
+        .status-icon {
+
+            width: 40px;
+
+            height: 40px;
+
+            border-radius: 50%;
+
+            border: 1px solid var(--success);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: var(--success);
+
+            margin-right: 20px;
+
+        }
+
+
+        .record-info {
+
+            flex: 1;
+
+        }
+
+
+        .record-info h4 {
+
+            margin: 0;
+
+            font-size: 15px;
+
+        }
+
+
+        .record-info p {
+
+            margin: 4px 0 0;
+
+            font-size: 12px;
+
+            color: var(--text-muted);
+
+        }
+
+
+        /* =====================================================
+           HANDOVER STATUS TAG
+        ====================================================== */
+
+        .handover-tag {
+
+            background: #e8f8f5;
+
+            color: var(--success);
+
+            padding: 5px 12px;
+
+            border-radius: 4px;
+
+            font-size: 10px;
+
+            font-weight: bold;
+
+            margin-right: 15px;
+
+        }
+
+
+        /* =====================================================
+           ACTION BUTTONS
+        ====================================================== */
+
+        .action-btns {
+
+            display: flex;
+
+            gap: 8px;
+
+        }
+
+
+        .btn-icon {
+
+            border: none;
+
+            background: #f8f9fa;
+
+            padding: 8px;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            color: var(--text-muted);
+
+        }
+
+
+        .btn-icon:hover.edit {
+
+            color: var(--primary);
+
+            background: #f0ebff;
+
+        }
+
+
+        .btn-icon:hover.delete {
+
+            color: var(--danger);
+
+            background: #ffebee;
+
+        }
+
+
+        /* =====================================================
+           EMPTY STATE
+        ====================================================== */
+
+        .empty-state {
+
+            text-align: center;
+
+            padding: 40px;
+
+            color: var(--text-muted);
+
+            background: white;
+
+            border-radius: 10px;
+
+            border: 1px solid var(--border);
+
+        }
+
+    </style>
+
+</head>
+
+
+<body ng-controller="ClaimsController">
+    <script>
+        // FoundAI admin-session guard: no database required for this demo login.
+        (function () {
+            if (sessionStorage.getItem("foundaiAdminAuthenticated") !== "true") {
+                window.location.replace("admin-login.html");
+            }
+        })();
+    </script>
+
+
+
+    <div class="app-container">
+
+
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div style="width:42px;height:42px;border-radius:12px;background:#5b2dcc;color:white;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 6px #eee9ff;">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:18px;line-height:20px;color:#111;font-weight:700;">FoundAI</div>
+                        <div style="font-size:9px;letter-spacing:1.5px;color:#5b2dcc;font-weight:600;">INTELLIGENT RECOVERY</div>
+                    </div>
+                </div>
+            </div>
+
+            <ul style="padding:0">
+
+                <li class="nav-item">
+                    <a href="admin-mod.html" style="display:block;color:inherit;text-decoration:none;">
+                        <i class="fas fa-cog"></i>
+                        Admin Mod
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="reward-escrow.html" style="display:block;color:inherit;text-decoration:none;">
+                        <i class="fas fa-shield-alt"></i>
+                        Reward Escrow
+                    </a>
+                </li>
+
+                <li class="nav-item active">
+                    <a href="claims-history.html" style="display:block;color:inherit;text-decoration:none;">
+                        <span style="margin-right:12px;width:18px;display:inline-block;">📜</span>
+                        Claims History
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="../dashboard/dashboard.html" style="display:block;color:inherit;text-decoration:none;">
+                        <i class="fas fa-th-large"></i>
+                        Back to Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='../login/index.html';})(); return false;" style="display:block;color:inherit;text-decoration:none;">
+                        <i class="fas fa-power-off"></i>
+                        Logout
+                    </a>
+                </li>
+
+            </ul>
+
+        </aside>
+
+
+        <!-- =================================================
+             MAIN AREA
+        ================================================== -->
+
+        <main class="main-content">
+
+
+            <!-- =================================================
+                 TOP NAVIGATION
+            ================================================== -->
+
+            <header class="top-nav">
+
+
+                <!-- Existing search functionality -->
+
+                <input
+                    type="text"
+                    class="search-box"
+                    placeholder="Search physical asset ledgers..."
+                    ng-model="searchQuery">
+
+
+                <div
+                    style="
+                        display:flex;
+                        align-items:center;
+                        gap:15px;
+                    ">
+
+
+                    <div style="text-align:right">
+
+                        <span
+                            style="
+                                font-size:13px;
+                                font-weight:600
+                            ">
+
+                            {{user.name}}
+
+                        </span>
+
+
+                        <br>
+
+
+                        <span
+                            style="
+                                font-size:10px;
+                                color:var(--primary)
+                            ">
+
+                            {{user.status}}
+
+                        </span>
+
+                    </div>
+
+
+                    <img
+                        src="https://i.pravatar.cc/100?img=12"
+                        style="
+                            width:35px;
+                            border-radius:50%
+                        "
+                        alt="User">
+
+                </div>
+
+            </header>
+
+
+            <div class="content-body">
+
+
+                <!-- =================================================
+                     ADD LOGIC UI
+                     
+                     Existing add functionality retained.
+                     pulseClick added.
+                ================================================== -->
+
+                <div class="add-claim-form">
+
+
+                    <i
+                        class="fas fa-plus-circle"
+                        style="color: var(--primary)">
+                    </i>
+
+
+                    <input
+                        type="text"
+                        ng-model="newItem.asset"
+                        placeholder="Asset Name">
+
+
+                    <input
+                        type="text"
+                        ng-model="newItem.claimant"
+                        placeholder="Claimant Name">
+
+
+                    <!-- CUSTOM DIRECTIVE: pulseClick -->
+
+                    <button
+                        class="btn-handshake"
+                        pulse-click
+                        ng-click="addNewClaim()">
+
+                        Add Record
+
+                    </button>
+
+                </div>
+
+
+                <!-- =================================================
+                     PAGE HEADER
+                ================================================== -->
+
+                <div class="page-header">
+
+                    <div>
+
+                        <h2 style="margin:0">
+
+                            Claims Archival History
+
+                        </h2>
+
+
+                        <p
+                            style="
+                                color:var(--text-muted);
+                                font-size:14px;
+                                margin-top:5px;
+                            ">
+
+                            Factory-managed ledger of verified
+                            handshake logs.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     STATS CARD
+                ================================================== -->
+
+                <div class="index-card">
+
+
+                    <h3 style="margin:0">
+
+                        Handshake Integrity Index
+
+                    </h3>
+
+
+                    <div
+                        style="
+                            display:flex;
+                            justify-content:space-between;
+                            font-size:11px;
+                            font-weight:bold;
+                            margin-top:10px;
+                        ">
+
+
+                        <span
+                            style="color:var(--success)">
+
+                            FACTORY STATUS: OPERATIONAL
+
+                        </span>
+
+
+                        <!-- CUSTOM DIRECTIVE: countUp -->
+
+                        <span>
+
+                            <span
+                                count-up="{{records.length}}">
+
+                                0
+
+                            </span>
+
+                            Records Tracked
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="progress-bar-bg">
+
+                        <div
+                            class="progress-fill"
+                            style="width:100%">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     ARCHIVAL RECORD LIST
+                     
+                     ngAnimate:
+                     Every record gets stagger-item.
+                ================================================== -->
+
+                <div
+                    class="record-card stagger-item"
+
+                    ng-repeat="
+                        item in records | filter:searchQuery
+                    "
+
+                    data-index="{{$index}}">
+
+
+                    <!-- STATUS ICON -->
+
+                    <div class="status-icon">
+
+                        <i class="fas fa-check"></i>
+
+                    </div>
+
+
+                    <!-- RECORD DETAILS -->
+
+                    <div class="record-info">
+
+
+                        <h4>
+
+                            {{item.asset}}
+
+                        </h4>
+
+
+                        <p>
+
+                            Claimant:
+
+                            <strong>
+                                {{item.claimant}}
+                            </strong>
+
+                            •
+
+                            {{item.date | date:'mediumDate'}}
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- =================================================
+                         HANDOVER TAG
+                         
+                         flashOnChange watches item.status.
+                    ================================================== -->
+
+                    <div
+                        class="handover-tag"
+
+                        flash-on-change="{{item.status}}">
+
+                        {{item.status | uppercase}}
+
+                    </div>
+
+
+                    <!-- =================================================
+                         UPDATE / DELETE
+                         
+                         pulseClick added to both buttons.
+                    ================================================== -->
+
+                    <div class="action-btns">
+
+
+                        <!-- UPDATE -->
+
+                        <button
+                            class="btn-icon edit"
+                            title="Update Status"
+                            pulse-click
+                            ng-click="
+                                updateClaimStatus(item.id)
+                            ">
+
+                            <i class="fas fa-sync-alt"></i>
+
+                        </button>
+
+
+                        <!-- DELETE -->
+
+                        <button
+                            class="btn-icon delete"
+                            title="Delete Record"
+                            pulse-click
+                            ng-click="
+                                deleteClaim(item.id)
+                            ">
+
+                            <i class="fas fa-trash"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     EMPTY STATE
+                     
+                     Existing ng-if functionality retained.
+                ================================================== -->
+
+                <div
+                    class="empty-state"
+                    ng-if="
+                        (records | filter:searchQuery).length == 0
+                    ">
+
+                    No records found.
+                    Add a new claim above.
+
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+
+    <!-- =========================================================
+         ANGULARJS
+    ========================================================== -->
+
+    <script>
+
+
+        /* =====================================================
+           1. MODULE
+
+           Existing module:
+           claimsApp
+
+           Added:
+           ngAnimate
+        ====================================================== */
+
+        
+        // Keep the logged-in admin identity available to the existing page bindings.
+        var loggedInAdmin = sessionStorage.getItem("foundaiAdminUser") || "admin";
+
+        var app = angular.module(
+            'claimsApp',
+            ['ngAnimate']
+        );
+
+
+        /* =====================================================
+           2. ngAnimate JS-BASED ENTER ANIMATION
+
+           Applied to:
+           .record-card.stagger-item
+
+           Report requirements:
+           - index * 80ms delay
+           - 450ms duration
+           - opacity
+           - translateY
+           - requestAnimationFrame
+        ====================================================== */
+
+        app.animation(
+            '.stagger-item',
+            function() {
+
+                return {
+
+                    enter: function(
+                        element,
+                        doneFn
+                    ) {
+
+
+                        /*
+                         * Get ng-repeat index.
+                         */
+
+                        var index =
+                            parseInt(
+                                element.attr(
+                                    'data-index'
+                                )
+                            ) || 0;
+
+
+                        /*
+                         * Stagger delay.
+                         */
+
+                        var delay =
+                            index * 80;
+
+
+                        /*
+                         * Animation duration.
+                         */
+
+                        var duration = 450;
+
+
+                        /*
+                         * Initial opacity.
+                         */
+
+                        element.css(
+                            'opacity',
+                            0
+                        );
+
+
+                        /*
+                         * Initial vertical position.
+                         */
+
+                        element.css(
+                            'transform',
+                            'translateY(16px)'
+                        );
+
+
+                        /*
+                         * Wait according to index.
+                         */
+
+                        setTimeout(
+                            function() {
+
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    /*
+                                     * Calculate progress.
+                                     */
+
+                                    var progress =
+                                        Math.min(
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+                                            1
+                                        );
+
+
+                                    /*
+                                     * Fade in.
+                                     */
+
+                                    element.css(
+                                        'opacity',
+                                        progress
+                                    );
+
+
+                                    /*
+                                     * Move upward.
+                                     */
+
+                                    element.css(
+                                        'transform',
+
+                                        'translateY(' +
+
+                                        (
+                                            16 *
+                                            (
+                                                1 -
+                                                progress
+                                            )
+                                        ) +
+
+                                        'px)'
+                                    );
+
+
+                                    /*
+                                     * Continue animation.
+                                     */
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        /*
+                                         * Notify ngAnimate.
+                                         */
+
+                                        doneFn();
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+
+                            },
+                            delay
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           3. pulseClick DIRECTIVE
+
+           Used on:
+           - Add Record
+           - Update
+           - Delete
+
+           Pure JS animation.
+        ====================================================== */
+
+        app.directive(
+            'pulseClick',
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element
+                    ) {
+
+
+                        element.on(
+                            'click',
+                            function() {
+
+
+                                var duration = 220;
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+                                        Math.min(
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+                                            1
+                                        );
+
+
+                                    var scale;
+
+
+                                    /*
+                                     * Scale down.
+                                     */
+
+                                    if (
+                                        progress < 0.5
+                                    ) {
+
+
+                                        scale =
+                                            1 -
+                                            (
+                                                0.06 *
+                                                (
+                                                    progress /
+                                                    0.5
+                                                )
+                                            );
+
+
+                                    }
+
+                                    /*
+                                     * Return to normal.
+                                     */
+
+                                    else {
+
+
+                                        scale =
+                                            0.94 +
+                                            (
+                                                0.06 *
+                                                (
+                                                    (
+                                                        progress -
+                                                        0.5
+                                                    ) /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+
+                                    element.css(
+                                        'transform',
+                                        'scale(' +
+                                        scale +
+                                        ')'
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+
+                                    }
+
+                                    else {
+
+
+                                        element.css(
+                                            'transform',
+                                            'scale(1)'
+                                        );
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+                            }
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           4. flashOnChange DIRECTIVE
+
+           Watches:
+           item.status
+
+           Triggered when:
+           Verified <-> Archived
+           or
+           New Pending record -> Updated
+        ====================================================== */
+
+        app.directive(
+            'flashOnChange',
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        /*
+                         * Don't animate initial rendering.
+                         */
+
+                        var isFirst = true;
+
+
+                        attrs.$observe(
+                            'flashOnChange',
+                            function() {
+
+
+                                if (isFirst) {
+
+                                    isFirst = false;
+
+                                    return;
+
+                                }
+
+
+                                var duration = 350;
+
+                                var start = null;
+
+
+                                function step(ts) {
+
+
+                                    if (!start) {
+
+                                        start = ts;
+
+                                    }
+
+
+                                    var progress =
+                                        Math.min(
+                                            (
+                                                ts -
+                                                start
+                                            ) /
+                                            duration,
+                                            1
+                                        );
+
+
+                                    /*
+                                     * Scale up to 1.18
+                                     * and return to 1.
+                                     */
+
+                                    var scale;
+
+
+                                    if (
+                                        progress < 0.5
+                                    ) {
+
+
+                                        scale =
+                                            1 +
+                                            (
+                                                0.18 *
+                                                (
+                                                    progress /
+                                                    0.5
+                                                )
+                                            );
+
+
+                                    }
+
+                                    else {
+
+
+                                        scale =
+                                            1.18 -
+                                            (
+                                                0.18 *
+                                                (
+                                                    (
+                                                        progress -
+                                                        0.5
+                                                    ) /
+                                                    0.5
+                                                )
+                                            );
+
+                                    }
+
+
+                                    element.css(
+                                        'transform',
+                                        'scale(' +
+                                        scale +
+                                        ')'
+                                    );
+
+
+                                    if (
+                                        progress < 1
+                                    ) {
+
+
+                                        requestAnimationFrame(
+                                            step
+                                        );
+
+                                    }
+
+                                }
+
+
+                                requestAnimationFrame(
+                                    step
+                                );
+
+                            }
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           5. countUp DIRECTIVE
+
+           Used on:
+           Records Tracked
+
+           Animates:
+           0 -> records.length
+
+           Duration:
+           800ms
+        ====================================================== */
+
+        app.directive(
+            'countUp',
+            function() {
+
+                return {
+
+                    restrict: 'A',
+
+                    link: function(
+                        scope,
+                        element,
+                        attrs
+                    ) {
+
+
+                        function animateTo(
+                            target
+                        ) {
+
+
+                            /*
+                             * Decimal support retained
+                             * from report implementation.
+                             */
+
+                            var decimals =
+                                parseInt(
+                                    attrs.countUpDecimals
+                                ) || 0;
+
+
+                            var start = 0;
+
+                            var duration = 800;
+
+                            var startTime = null;
+
+
+                            function step(ts) {
+
+
+                                if (!startTime) {
+
+                                    startTime = ts;
+
+                                }
+
+
+                                var progress =
+                                    Math.min(
+                                        (
+                                            ts -
+                                            startTime
+                                        ) /
+                                        duration,
+                                        1
+                                    );
+
+
+                                var value =
+                                    start +
+                                    (
+                                        target -
+                                        start
+                                    ) *
+                                    progress;
+
+
+                                element.text(
+                                    value.toFixed(
+                                        decimals
+                                    )
+                                );
+
+
+                                if (
+                                    progress < 1
+                                ) {
+
+
+                                    requestAnimationFrame(
+                                        step
+                                    );
+
+                                }
+
+                            }
+
+
+                            requestAnimationFrame(
+                                step
+                            );
+
+                        }
+
+
+                        /*
+                         * Observe AngularJS value.
+                         */
+
+                        attrs.$observe(
+                            'countUp',
+                            function(newVal) {
+
+
+                                var num =
+                                    parseFloat(
+                                        newVal
+                                    );
+
+
+                                if (
+                                    !isNaN(num)
+                                ) {
+
+
+                                    animateTo(
+                                        num
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           6. EXISTING FACTORY
+
+           ALL ORIGINAL BUSINESS LOGIC RETAINED.
+           
+           READ
+           ADD
+           DELETE
+           UPDATE
+        ====================================================== */
+
+        app.factory(
+            'ClaimsFactory',
+            function() {
+
+
+                /*
+                 * Private claims data.
+                 */
+
+                var claims = [
+
+
+                    {
+                        id: 1,
+
+                        asset:
+                            'Apple MacBook Pro 14"',
+
+                        claimant:
+                            'Sarah Jenkins',
+
+                        date:
+                            new Date(),
+
+                        status:
+                            'Verified'
+                    },
+
+
+                    {
+                        id: 2,
+
+                        asset:
+                            'Leather Bi-Fold Wallet',
+
+                        claimant:
+                            'Priya Sharma',
+
+                        date:
+                            new Date(),
+
+                        status:
+                            'Verified'
+                    }
+
+                ];
+
+
+                return {
+
+
+                    /*
+                     * READ
+                     */
+
+                    getClaims:
+                        function() {
+
+                            return claims;
+
+                        },
+
+
+                    /*
+                     * ADD
+                     */
+
+                    add:
+                        function(
+                            newAsset,
+                            newClaimant
+                        ) {
+
+
+                            var newId =
+                                claims.length > 0
+
+                                ?
+
+                                claims[
+                                    claims.length - 1
+                                ].id + 1
+
+                                :
+
+                                1;
+
+
+                            claims.push({
+
+                                id:
+                                    newId,
+
+                                asset:
+                                    newAsset,
+
+                                claimant:
+                                    newClaimant,
+
+                                date:
+                                    new Date(),
+
+                                status:
+                                    'Pending'
+
+                            });
+
+                        },
+
+
+                    /*
+                     * DELETE
+                     */
+
+                    remove:
+                        function(id) {
+
+
+                            for (
+                                var i = 0;
+                                i < claims.length;
+                                i++
+                            ) {
+
+
+                                if (
+                                    claims[i].id === id
+                                ) {
+
+
+                                    claims.splice(
+                                        i,
+                                        1
+                                    );
+
+
+                                    break;
+
+                                }
+
+                            }
+
+                        },
+
+
+                    /*
+                     * UPDATE
+                     */
+
+                    updateStatus:
+                        function(id) {
+
+
+                            for (
+                                var i = 0;
+                                i < claims.length;
+                                i++
+                            ) {
+
+
+                                if (
+                                    claims[i].id === id
+                                ) {
+
+
+                                    claims[i].status =
+
+                                        (
+                                            claims[i].status
+                                            ===
+                                            'Verified'
+                                        )
+
+                                        ?
+
+                                        'Archived'
+
+                                        :
+
+                                        'Verified';
+
+
+                                    break;
+
+                                }
+
+                            }
+
+                        }
+
+                };
+
+            }
+        );
+
+
+        /* =====================================================
+           7. EXISTING CONTROLLER
+
+           Existing functions preserved.
+        ====================================================== */
+
+        app.controller(
+            'ClaimsController',
+            function(
+                $scope,
+                $http
+            ) {
+
+
+                /*
+                 * Existing user.
+                 */
+
+                $scope.user = {
+
+                    name:
+                        "Alex Rivera",
+
+                    status:
+                        "Admin Mode"
+
+                };
+
+
+                /*
+                 * Existing search model.
+                 */
+
+                $scope.searchQuery = "";
+
+
+                /*
+                 * Existing form model.
+                 */
+
+                $scope.newItem = {
+
+                    asset:
+                        "",
+
+                    claimant:
+                        ""
+
+                };
+
+
+                /*
+                 * Existing factory data binding.
+                 */
+
+                $scope.records = [];
+
+$http.get(
+    "http://localhost:5000/api/claims"
+)
+.then(function(response) {
+
+    $scope.records = response.data;
+
+});
+
+
+                /*
+                 * Existing ADD functionality.
+                 */
+
+                $scope.addNewClaim = function() {
+
+    if (
+        $scope.newItem.asset &&
+        $scope.newItem.claimant
+    ) {
+
+        $http.post(
+            "http://localhost:5000/api/claims",
+            {
+                asset: $scope.newItem.asset,
+                claimant: $scope.newItem.claimant
+            }
+        )
+        .then(function(response) {
+
+            $scope.records.push(response.data);
+
+            $scope.newItem = {
+                asset: "",
+                claimant: ""
+            };
+
+        });
+
+    } else {
+
+        alert("Please fill in both fields");
+
+    }
+
+};
+
+                /*
+                 * Existing DELETE functionality.
+                 */
+
+                $scope.deleteClaim = function(id) {
+
+    if (
+        confirm(
+            "Permanently delete this claim record?"
+        )
+    ) {
+
+        $http.delete(
+            "http://localhost:5000/api/claims/" + id
+        )
+        .then(function() {
+
+            $scope.records =
+                $scope.records.filter(
+                    function(item) {
+                        return item.id !== id;
+                    }
+                );
+
+        });
+
+    }
+
+};
+
+                /*
+                 * Existing UPDATE functionality.
+                 */
+
+                $scope.updateClaimStatus = function(id) {
+
+    var claim = $scope.records.find(
+        function(item) {
+            return item.id === id;
+        }
+    );
+
+
+    var newStatus =
+        claim.status === "Verified"
+        ? "Archived"
+        : "Verified";
+
+
+    $http.put(
+        "http://localhost:5000/api/claims/" + id,
+        {
+            status: newStatus
+        }
+    )
+    .then(function(response) {
+
+        var index =
+            $scope.records.findIndex(
+                function(item) {
+                    return item.id === id;
+                }
+            );
+
+
+        $scope.records[index] =
+            response.data;
+
+    });
+
+};
+
+            }
+        );
+
+    </script>
+
+</body>
+
+</html>
+

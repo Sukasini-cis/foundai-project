@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html ng-app="ProfileApp">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoundAI - My Profile</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------------- SIDEBAR (matching FoundAI dashboard) ---------------- */
+  .sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-right: 1px solid #eceef5;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-left: 4px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: #5c34e8;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(92,52,232,0.25);
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+  }
+
+  .logo-subtitle {
+    font-size: 9px;
+    font-weight: 700;
+    color: #838ca0;
+    letter-spacing: 0.9px;
+    margin-top: 3px;
+  }
+
+  .sidebar-search {
+    margin-bottom: 20px;
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 13.5px;
+    background: #f2eefd;
+    outline: none;
+    color: #4b5563;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .sidebar-search input::placeholder {
+    color: #594e77;
+    opacity: 0.9;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #4b5563;
+    font-size: 14.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 2px;
+  }
+
+  .nav-item:hover {
+    background: #f8fafc;
+    color: #1f2937;
+  }
+
+  .nav-item.active {
+    background: #f2eefd;
+    color: #6c3ce9;
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    background: #6c3ce9;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .nav-icon {
+    font-size: 17px;
+    width: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .nav-dot {
+    width: 7px;
+    height: 7px;
+    background: #6c3ce9;
+    border-radius: 50%;
+    margin-left: auto;
+  }
+
+  /* ---------------- MAIN CONTENT AREA ---------------- */
+  .main-content {
+    flex: 1;
+    padding: 24px 30px;
+    overflow-y: auto;
+  }
+
+  .container { max-width: 950px; margin: auto; }
+  .banner { background: linear-gradient(90deg,#5b3df0,#2f2ba8); border-radius: 12px 12px 0 0; height: 120px; }
+  .profile-card { background: #fff; border-radius: 0 0 12px 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: flex-end; margin-top: -50px; }
+  .avatar { width: 80px; height: 80px; border-radius: 50%; border: 4px solid #fff; margin-top: -40px; object-fit: cover; }
+  .profile-info { display: flex; gap: 16px; align-items: center; }
+  .profile-info h3 { margin: 0; font-size: 20px; }
+  .profile-info small { color: #777; }
+  .btn { background: #6c3ce9; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  .btn-outline { background: #fff; border: 1px solid #ccc; color: #333; padding: 10px 18px; border-radius: 8px; cursor: pointer; margin-right: 8px; }
+  .grid-2 { display: flex; gap: 20px; margin-top: 20px; }
+  .card { background: #fff; flex: 1; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .label { font-size: 11px; text-transform: uppercase; color: #888; font-weight: bold; }
+  .trust-score { font-size: 36px; font-weight: bold; margin: 8px 0; }
+  .badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; margin-right: 6px; margin-bottom: 6px; }
+  .badge.member { background: #e6f0ff; color: #2b5bd7; }
+  .badge.helper { background: #f0e6ff; color: #7b3ce9; }
+  .badge.hero { background: #ffe6ea; color: #e04a63; }
+  .stats-grid { display: flex; gap: 20px; margin-top: 20px; }
+  .stat-card { background: #fff; flex: 1; padding: 16px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: left; }
+  .stat-value { font-size: 26px; font-weight: bold; margin: 6px 0; }
+  .stat-card button { margin-top: 8px; font-size: 11px; background: #f2eefe; color: #6c3ce9; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+  .chart-card { background: #fff; margin-top: 20px; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .bars { display: flex; align-items: flex-end; gap: 24px; height: 220px; margin-top: 20px; }
+  .bar-wrap { text-align: center; flex: 1; }
+  .bar { background: #6c3ce9; border-radius: 4px 4px 0 0; width: 40px; margin: 0 auto; }
+  .add-badge-form { display: flex; gap: 10px; margin-top: 14px; }
+  .add-badge-form select, .add-badge-form input { padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+  .add-badge-form button { background: #6c3ce9; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 13px; }
+
+  /* Notification / Message banners */
+  .alert-box {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .alert-box.error { background: #fdeaea; color: #e74c3c; }
+  .alert-box.success { background: #eafaf0; color: #27ae60; }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(0.6); }
+    70%  { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes pulseClick {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(0.93); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes avatarPop {
+    0%   { opacity: 0; transform: scale(0.5) rotate(-8deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+  }
+
+  [fade-in] { opacity: 0; }
+
+  .card, .stat-card, .chart-card { transition: transform 0.25s ease, box-shadow 0.25s ease; }
+  .card:hover, .stat-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+
+  .badge { transition: transform 0.2s ease; }
+  .badge:hover { transform: scale(1.08); }
+
+  .avatar { animation: avatarPop 0.6s ease; }
+
+  /* ---------------- Bar chart animation ---------------- */
+  .bar-wrap { position: relative; }
+  .bar {
+    background: linear-gradient(180deg, #9b6bff 0%, #6c3ce9 55%, #4b2ec2 100%);
+    border-radius: 8px 8px 3px 3px;
+    box-shadow: 0 3px 10px rgba(108,60,233,0.28);
+    position: relative;
+    overflow: hidden;
+    transform-origin: bottom center;
+    transition: height 0.9s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                filter 0.2s ease;
+  }
+
+  .bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 45%; height: 100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,0.65), transparent);
+    transform: skewX(-20deg);
+    pointer-events: none;
+  }
+  .bar.shimmer::after { animation: barShimmer 0.9s ease; }
+
+  @keyframes barShimmer {
+    from { left: -60%; }
+    to   { left: 140%; }
+  }
+
+  @keyframes barBounce {
+    0%   { transform: scaleY(1); }
+    35%  { transform: scaleY(1.07); }
+    65%  { transform: scaleY(0.97); }
+    100% { transform: scaleY(1); }
+  }
+  .bar.bounce { animation: barBounce 0.45s ease; }
+
+  .bar-value {
+    opacity: 0;
+    transform: translateY(8px) scale(0.7);
+    font-size: 12px;
+    font-weight: bold;
+    color: #4b2ec2;
+    margin-bottom: 6px;
+    transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .bar-value.shown { opacity: 1; transform: translateY(0) scale(1); }
+
+  .bar:hover {
+    filter: brightness(1.12);
+    transform: scaleY(1.015) scale(1.08, 1);
+    box-shadow: 0 6px 18px rgba(108,60,233,0.5);
+    cursor: pointer;
+  }
+  .bar-wrap:hover .bar-value { opacity: 1; transform: translateY(0) scale(1.1); color: #6c3ce9; }
+
+  .btn, .btn-outline, .stat-card button, .add-badge-form button { transition: transform 0.15s ease; }
+  .pulse-anim { animation: pulseClick 0.35s ease; }
+</style>
+</head>
+<body>
+
+<div class="app-layout" ng-controller="ProfileController as vm">
+
+  <!-- LEFT SIDEBAR (FoundAI Intelligent Recovery) -->
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="4" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="1.5" fill="#ffffff"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-title">FoundAI</span>
+        <span class="logo-subtitle">INTELLIGENT RECOVERY</span>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="sidebar-search">
+      <input type="text" placeholder="Search matches, items or loc">
+    </div>
+
+    <!-- Navigation Items (Reward Escrow, Admin Mod, Claims History EXCLUDED) -->
+    <nav class="sidebar-nav">
+      <!-- 1. Dashboard -->
+      <a href="../dashboard/dashboard.html" class="nav-item">
+        <span class="nav-icon" style="color: #6c3ce9; font-size: 19px;">▦</span>
+        <span>Dashboard</span>
+      </a>
+
+      <!-- 2. Report Lost -->
+      <a href="../reportlost/reportlost.html" class="nav-item">
+        <span class="nav-icon" style="color: #475569; font-size: 18px;">⚑</span>
+        <span>Report Lost</span>
+      </a>
+
+
+      <a href="../reportfound/reportfound.html" class="nav-item">
+        <span class="nav-icon" style="color: #475569; font-size: 17px;">🏷️</span>
+        <span>Report Found</span>
+      </a>
+
+      <!-- 3. My Profile (Active) -->
+      <a href="../profile/profile.html" class="nav-item active">
+        <span class="nav-icon">📁</span>
+        <span>My Profile</span>
+      </a>
+
+      <!-- 4. AI Search -->
+      <a class="nav-item">
+        <span class="nav-icon" style="color: #334155; font-size: 17px;">✦</span>
+        <span>AI Search</span>
+      </a>
+
+      <!-- 5. AR Navigation -->
+      <a href="../arnavigation.html" class="nav-item">
+        <span class="nav-icon">🧭</span>
+        <span>AR Navigation</span>
+      </a>
+
+      <!-- 6. AI Lost Heatmap -->
+      <a href="../heatmap.html" class="nav-item">
+        <span class="nav-icon">🔥</span>
+        <span>AI Lost Heatmap</span>
+      </a>
+
+      <!-- 7. Messages (with notification dot) -->
+      <a href="../messages/messages.html" class="nav-item">
+        <span class="nav-icon" style="font-size: 17px;">✉️</span>
+        <span>Messages</span>
+        <span class="nav-dot"></span>
+      </a>
+
+      <!-- 8. Notifications -->
+      <a href="../notifi/notifi.html" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        <span>Notifications</span>
+      </a>
+
+      <!-- Logout -->
+      <a href="#" onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='../login/index.html';})(); return false;" class="nav-item">
+        <span class="nav-icon">⏻</span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- MAIN PROFILE CONTAINER -->
+  <main class="main-content">
+    <div class="container" id="profileApp">
+      <div class="banner"></div>
+      <div class="profile-card" fade-in="0">
+        <div class="profile-info">
+          <img class="avatar" ng-src="{{ vm.user.avatar }}" alt="avatar">
+          <div>
+            <h3>{{ vm.user.name }} <span ng-if="vm.user.verified" style="color:#27ae60;">&#10003;</span></h3>
+            <small>{{ vm.user.location }}</small>
+          </div>
+        </div>
+        <div>
+          <button class="btn-outline" pulse-click ng-click="vm.toggleVerifiedStatus();">
+            {{ vm.user.verified ? 'Remove Verification' : 'Request Verification' }}
+          </button>
+          <button class="btn" pulse-click>Public View</button>
+        </div>
+      </div>
+
+      <div class="alert-box error" ng-if="vm.errorMessage">{{ vm.errorMessage }}</div>
+      <div class="alert-box success" ng-if="vm.successMessage">{{ vm.successMessage }}</div>
+
+      <div class="grid-2">
+        <div class="card" fade-in="1">
+          <div class="label">Network Reputation</div>
+          <h4>Trust Score Indicator</h4>
+          <div class="trust-score">
+            <span count-up="{{ vm.user.trustScore }}" count-up-decimals="1">{{ vm.user.trustScore | number:1 }}</span>
+            <span>{{ vm.user.trustScore | starRating }}</span>
+          </div>
+          <small>Based on {{ vm.user.verifiedClaims }} Verified Claims</small>
+          <p>Trust score is recalculated automatically as verified claims and disputes change.</p>
+          <button class="btn-outline" pulse-click ng-click="vm.recalculateTrustScore();">Recalculate Score</button>
+        </div>
+
+        <div class="card" fade-in="2">
+          <div class="label">Gamification</div>
+          <h4>Achievement Badges</h4>
+          <div>
+            <span class="badge" ng-class="b.type" ng-repeat="b in vm.badges" fade-in="{{ 3 + $index }}" fade-in-pop="true">{{ b.name }}</span>
+          </div>
+          <p>Unlocked {{ vm.badges.length }} legendary awards for helping recover high-value assets.</p>
+
+          <div class="add-badge-form">
+            <select ng-model="vm.newBadgeType">
+              <option value="member">Member</option>
+              <option value="helper">Helper</option>
+              <option value="hero">Hero</option>
+            </select>
+            <input type="text" ng-model="vm.newBadgeName" placeholder="Badge name">
+            <button pulse-click ng-click="vm.addBadge();">Unlock Badge</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card" ng-repeat="s in vm.stats" fade-in="{{ 6 + $index }}">
+          <div class="label">{{ s.label }}</div>
+          <div class="stat-value"><span count-up="{{ s.value }}" count-up-unit="{{ s.unit }}">{{ s.value | statFormat:s.unit }}</span></div>
+          <button pulse-click ng-click="vm.incrementStat(s.key);">+1 {{ s.label }}</button>
+        </div>
+      </div>
+
+      <div class="chart-card" fade-in="9">
+        <h4>Monthly Recovery Analytics</h4>
+        <small>Tracking AI matching efficiency over the last {{ vm.monthlyData.length }} months. Average: {{ vm.monthlyAverage | number:1 }}</small>
+        <div class="bars">
+          <div class="bar-wrap" ng-repeat="m in vm.monthlyData">
+            <div class="bar-value">{{ m.value }}</div>
+            <div class="bar" style="height: {{ m.value | scaleHeight:vm.maxValue }}px" bar-grow="{{ $index }}"></div>
+            <small>{{ m.month }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+angular.module('ProfileApp', [])
+  .controller('ProfileController', ProfileController)
+  .filter('starRating', starRatingFilter)
+  .filter('statFormat', statFormatFilter)
+  .filter('scaleHeight', scaleHeightFilter)
+  .directive('fadeIn', fadeInDirective)
+  .directive('pulseClick', pulseClickDirective)
+  .directive('countUp', countUpDirective)
+  .directive('barGrow', barGrowDirective);
+
+// ---------------- FILTERS ----------------
+function starRatingFilter() {
+  return function (score) {
+    var fullStars = Math.round(score || 0);
+    return '\u2605'.repeat(fullStars) + '\u2606'.repeat(Math.max(0, 5 - fullStars));
+  };
+}
+
+function statFormatFilter() {
+  return function (value, unit) {
+    if (unit === 'hours') return value + 'h';
+    return value;
+  };
+}
+
+function scaleHeightFilter() {
+  return function (value, maxValue) {
+    var maxPixels = 180;
+    if (!maxValue) return 0;
+    return Math.round((value / maxValue) * maxPixels);
+  };
+}
+
+// ---------------- CONTROLLER (Connected to Node.js & MongoDB Atlas) ----------------
+ProfileController.$inject = ['$http'];
+function ProfileController($http) {
+  var vm = this;
+
+  // Read the logged-in user saved by login/index.html (same pattern
+  // used by dashboard.html) so this page shows THIS account's profile,
+  // not a shared/global one.
+  var loggedUser = null;
+  try {
+    var rawUser = localStorage.getItem('logged_in');
+    if (rawUser) { loggedUser = JSON.parse(rawUser); }
+  } catch (e) {
+    loggedUser = null;
+  }
+
+  if (!loggedUser || !loggedUser.id) {
+    // Nobody is signed in - send them to login instead of showing
+    // (or silently sharing) someone else's data.
+    window.location.href = '../login/index.html';
+    return;
+  }
+
+  var API_ROOT = (window.location.port === '5000')
+    ? window.location.origin + '/api/profile'
+    : 'http://localhost:5000/api/profile';
+  var API_BASE = API_ROOT + '/' + loggedUser.id;
+
+  // Initial placeholder data while fetching (overwritten once /api/profile/:userId responds)
+  var placeholderName = (loggedUser.fullName || loggedUser.name || loggedUser.username || '').trim() || 'FoundAI User';
+  vm.user = {
+    name: placeholderName,
+    location: loggedUser.organization || loggedUser.department || '',
+    avatar: 'https://i.pravatar.cc/150?img=12',
+    verified: true,
+    trustScore: 4.9,
+    verifiedClaims: 124,
+    disputedClaims: 3
+  };
+
+  vm.badges = [
+    { name: 'Trusted Member', type: 'member' },
+    { name: 'AI Helper', type: 'helper' },
+    { name: 'Community Hero', type: 'hero' }
+  ];
+
+  vm.stats = [
+    { key: 'itemsFound', label: 'Items Found', value: 24, unit: 'count' },
+    { key: 'itemsReturned', label: 'Items Returned', value: 18, unit: 'count' },
+    { key: 'connections', label: 'Connections Made', value: 1240, unit: 'count' }
+  ];
+
+  vm.monthlyData = [
+    { month: 'Jan', value: 8 }, { month: 'Feb', value: 12 }, { month: 'Mar', value: 18 },
+    { month: 'Apr', value: 14 }, { month: 'May', value: 9 }, { month: 'Jun', value: 17 }
+  ];
+
+  vm.newBadgeName = '';
+  vm.newBadgeType = 'member';
+  vm.errorMessage = '';
+  vm.successMessage = '';
+
+  function computeAnalytics() {
+    var sum = vm.monthlyData.reduce(function (acc, m) { return acc + m.value; }, 0);
+    vm.monthlyAverage = vm.monthlyData.length ? sum / vm.monthlyData.length : 0;
+    vm.maxValue = Math.max.apply(Math, vm.monthlyData.map(function (d) { return d.value; }));
+  }
+  computeAnalytics();
+
+  // READ: Load profile from MongoDB Atlas via backend API
+  function loadProfile() {
+    $http.get(API_BASE)
+      .then(function(res) {
+        if (res.data) {
+          vm.user = {
+            name: res.data.name,
+            location: res.data.location,
+            avatar: res.data.avatar,
+            verified: res.data.verified,
+            trustScore: res.data.trustScore,
+            verifiedClaims: res.data.verifiedClaims,
+            disputedClaims: res.data.disputedClaims
+          };
+          if (res.data.badges) vm.badges = res.data.badges;
+          if (res.data.stats) vm.stats = res.data.stats;
+          if (res.data.monthlyData) {
+            vm.monthlyData = res.data.monthlyData;
+            computeAnalytics();
+          }
+        }
+      })
+      .catch(function(err) {
+        console.warn('Backend profile fetch note:', err);
+      });
+  }
+
+  loadProfile();
+
+  // TOGGLE: Flip verified status in MongoDB Atlas
+  vm.toggleVerifiedStatus = function () {
+    $http.put(API_BASE + '/verify')
+      .then(function(res) {
+        vm.user.verified = res.data.verified;
+        vm.successMessage = vm.user.verified ? 'Verification granted!' : 'Verification removed.';
+        setTimeout(function() { vm.successMessage = ''; }, 2500);
+      })
+      .catch(function(err) {
+        vm.errorMessage = 'Failed to update verification status in database.';
+      });
+  };
+
+  // RECALCULATE: Update trust score in MongoDB Atlas
+  vm.recalculateTrustScore = function () {
+    $http.put(API_BASE + '/trust-score')
+      .then(function(res) {
+        vm.user.trustScore = res.data.trustScore;
+        vm.successMessage = 'Trust score recalculated from database claims!';
+        setTimeout(function() { vm.successMessage = ''; }, 2500);
+      })
+      .catch(function(err) {
+        vm.errorMessage = 'Failed to recalculate trust score in database.';
+      });
+  };
+
+  // ADD: Unlock achievement badge in MongoDB Atlas (max 6)
+  vm.addBadge = function () {
+    if (!vm.newBadgeName || !vm.newBadgeName.trim()) return;
+
+    $http.post(API_BASE + '/badges', {
+      name: vm.newBadgeName.trim(),
+      type: vm.newBadgeType
+    })
+    .then(function(res) {
+      vm.badges = res.data.badges;
+      vm.newBadgeName = '';
+      vm.errorMessage = '';
+      vm.successMessage = 'Badge unlocked and saved to database!';
+      setTimeout(function() { vm.successMessage = ''; }, 2500);
+    })
+    .catch(function(err) {
+      vm.errorMessage = (err.data && err.data.error) ? err.data.error : 'Failed to unlock badge.';
+      setTimeout(function() { vm.errorMessage = ''; }, 3500);
+    });
+  };
+
+  // INCREMENT: Stat +1 in MongoDB Atlas
+  vm.incrementStat = function (key) {
+    $http.put(API_BASE + '/stats/' + key + '/increment')
+      .then(function(res) {
+        if (res.data.stats) {
+          vm.stats = res.data.stats;
+        }
+      })
+      .catch(function(err) {
+        vm.errorMessage = 'Failed to increment stat in database.';
+      });
+  };
+}
+
+// ---------------- CUSTOM DIRECTIVES ----------------
+function fadeInDirective() {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var index = parseFloat(attrs.fadeIn) || 0;
+      var delay = index * 90;
+      var usePop = attrs.fadeInPop === 'true';
+
+      setTimeout(function () {
+        element.css('animation', (usePop ? 'popIn' : 'fadeInUp') + ' 0.5s ease forwards');
+        element.addClass('fade-in-ready');
+      }, delay);
+    }
+  };
+}
+
+function pulseClickDirective() {
+  return {
+    restrict: 'A',
+    link: function (scope, element) {
+      element.on('click', function () {
+        element.removeClass('pulse-anim');
+        void element[0].offsetWidth;
+        element.addClass('pulse-anim');
+      });
+    }
+  };
+}
+
+function countUpDirective() {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var decimals = parseInt(attrs.countUpDecimals) || 0;
+
+      function formatValue(num) {
+        var text = decimals ? num.toFixed(decimals) : Math.round(num).toString();
+        if (attrs.countUpUnit === 'hours') text += 'h';
+        return text;
+      }
+
+      function animateTo(target) {
+        var targetNum = parseFloat(target);
+        if (isNaN(targetNum)) return;
+        var startNum = 0;
+        var startTime = null;
+        var duration = 800;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var progress = Math.min((timestamp - startTime) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          var current = startNum + (targetNum - startNum) * eased;
+          element.text(formatValue(current));
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            element.text(formatValue(targetNum));
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      attrs.$observe('countUp', function (newVal) {
+        if (newVal !== undefined && newVal !== '') animateTo(newVal);
+      });
+    }
+  };
+}
+
+function barGrowDirective() {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var grown = false;
+      var index = parseFloat(attrs.barGrow) || 0;
+      var staggerDelay = index * 130;
+
+      attrs.$observe('style', function () {
+        if (grown) return;
+        var finalHeight = element[0].style.height;
+        if (!finalHeight || finalHeight === '0px') return;
+        grown = true;
+
+        element.css('height', '0px');
+
+        setTimeout(function () {
+          element.css('height', finalHeight);
+        }, 60 + staggerDelay);
+
+        element.on('transitionend', function onEnd(e) {
+          if (e.propertyName !== 'height') return;
+          element.off('transitionend', onEnd);
+
+          element.addClass('bounce');
+          element.addClass('shimmer');
+          setTimeout(function () {
+            element.removeClass('bounce');
+            element.removeClass('shimmer');
+          }, 900);
+
+          var valueLabel = element[0].previousElementSibling;
+          if (valueLabel && valueLabel.classList.contains('bar-value')) {
+            valueLabel.classList.add('shown');
+          }
+        });
+      });
+    }
+  };
+}
+</script>
+
+</body>
+</html>

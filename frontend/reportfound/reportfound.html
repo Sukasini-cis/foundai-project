@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html ng-app="ReportFoundApp">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FoundAI - Report Found Item</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.3/angular.min.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f5f6fa;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+
+  .app-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ---------------- SIDEBAR (matching FoundAI dashboard) ---------------- */
+  .sidebar {
+    width: 260px;
+    background: #ffffff;
+    border-right: 1px solid #eceef5;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-left: 4px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: #5c34e8;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(92,52,232,0.25);
+  }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.2;
+  }
+
+  .logo-subtitle {
+    font-size: 9px;
+    font-weight: 700;
+    color: #838ca0;
+    letter-spacing: 0.9px;
+    margin-top: 3px;
+  }
+
+  .sidebar-search {
+    margin-bottom: 20px;
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 13.5px;
+    background: #f2eefd;
+    outline: none;
+    color: #4b5563;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .sidebar-search input::placeholder {
+    color: #594e77;
+    opacity: 0.9;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #4b5563;
+    font-size: 14.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 2px;
+  }
+
+  .nav-item:hover {
+    background: #f8fafc;
+    color: #1f2937;
+  }
+
+  .nav-item.active {
+    background: #f2eefd;
+    color: #6c3ce9;
+    font-weight: 600;
+  }
+
+  .nav-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    background: #6c3ce9;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .nav-icon {
+    font-size: 17px;
+    width: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .nav-dot {
+    width: 7px;
+    height: 7px;
+    background: #6c3ce9;
+    border-radius: 50%;
+    margin-left: auto;
+  }
+
+  /* ---------------- MAIN CONTENT AREA ---------------- */
+  .main-content {
+    flex: 1;
+    padding: 32px 24px;
+    overflow-y: auto;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 24px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  h2 { color: #4b2ec2; margin-top: 0; }
+  .form-group { margin-bottom: 16px; }
+  label { display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 4px; text-transform: uppercase; }
+  input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+  input:focus, select:focus { outline: none; border-color: #6c3ce9; }
+  .row { display: flex; gap: 16px; }
+  .row .form-group { flex: 1; }
+
+  /* shiny glowing Publish Found Report button */
+  .btn-publish {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #6c3ce9, #8a5cf6, #a685fa, #8a5cf6, #6c3ce9);
+    background-size: 300% 100%;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    animation: shimmerBtn 3s linear infinite, glowHalo 2.2s ease-in-out infinite;
+    transition: transform 0.12s ease;
+  }
+  .btn-publish:hover { transform: translateY(-2px); }
+  .btn-publish:active { transform: scale(0.97); }
+  @keyframes shimmerBtn { 0% { background-position: 0% 0; } 100% { background-position: -300% 0; } }
+  @keyframes glowHalo {
+    0%, 100% { box-shadow: 0 4px 10px rgba(108,60,233,0.35), 0 0 0 0 rgba(108,60,233,0.4); }
+    50% { box-shadow: 0 4px 14px rgba(108,60,233,0.5), 0 0 0 6px rgba(108,60,233,0); }
+  }
+  .btn-publish::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+    pointer-events: none;
+  }
+  .btn-publish:hover::after { left: 150%; }
+
+  .ai-box { background: #6c3ce9; color: #fff; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+  .ai-box p { margin: 6px 0 0 0; }
+
+  .success-banner {
+    margin-top: 16px;
+    padding: 14px 18px;
+    background: #eafaf0;
+    color: #27ae60;
+    border-radius: 8px;
+    border: 1px solid #c3e6cb;
+    font-weight: bold;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .my-reports { margin-top: 28px; }
+  .report-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .report-row .status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .report-row .status.available { background: #eef0ff; color: #5b5bd6; }
+  .report-row .status.claimed { background: #fef3c7; color: #b45309; }
+  .report-row .status.returned { background: #e6f9ed; color: #27ae60; }
+
+  .report-row .actions button {
+    margin-left: 6px;
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .report-row .actions button:hover { opacity: 0.85; }
+  .btn-update { background: #f2eefe; color: #6c3ce9; }
+  .btn-delete { background: #fdeaea; color: #e74c3c; }
+  .error { color: #e74c3c; font-size: 13px; margin-top: 8px; }
+  .empty-state { text-align: center; color: #94a3b8; padding: 20px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="app-layout" ng-controller="ReportFoundController as vm">
+
+  <!-- LEFT SIDEBAR (FoundAI Intelligent Recovery) -->
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="4" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="12" cy="12" r="1.5" fill="#ffffff"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <span class="logo-title">FoundAI</span>
+        <span class="logo-subtitle">INTELLIGENT RECOVERY</span>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="sidebar-search">
+      <input type="text" placeholder="Search matches, items or loc">
+    </div>
+
+    <!-- Navigation Items (Reward Escrow, Admin Mod, Claims History EXCLUDED) -->
+    <nav class="sidebar-nav">
+      <!-- 1. Dashboard -->
+      <a href="../dashboard/dashboard.html" class="nav-item">
+        <span class="nav-icon" style="color: #6c3ce9; font-size: 19px;">▦</span>
+        <span>Dashboard</span>
+      </a>
+
+      <!-- 2. Report Lost -->
+      <a href="../reportlost/reportlost.html" class="nav-item">
+        <span class="nav-icon" style="color: #475569; font-size: 18px;">⚑</span>
+        <span>Report Lost</span>
+      </a>
+
+      <!-- 3. Report Found (Active) -->
+      <a href="../reportfound/reportfound.html" class="nav-item active">
+        <span class="nav-icon" style="color: #6c3ce9; font-size: 17px;">🏷️</span>
+        <span>Report Found</span>
+      </a>
+
+      <!-- 4. My Reports -->
+      <a href="../profile/profile.html" class="nav-item">
+        <span class="nav-icon">📁</span>
+        <span>My Profile</span>
+      </a>
+
+      <!-- 5. AI Search -->
+      <a class="nav-item">
+        <span class="nav-icon" style="color: #334155; font-size: 17px;">✦</span>
+        <span>AI Search</span>
+      </a>
+
+      <!-- 6. AR Navigation -->
+      <a href="../arnavigation.html" class="nav-item">
+        <span class="nav-icon">🧭</span>
+        <span>AR Navigation</span>
+      </a>
+
+      <!-- 7. AI Lost Heatmap -->
+      <a href="../heatmap.html" class="nav-item">
+        <span class="nav-icon">🔥</span>
+        <span>AI Lost Heatmap</span>
+      </a>
+
+      <!-- 8. Messages (with notification dot) -->
+      <a href="../messages/messages.html" class="nav-item">
+        <span class="nav-icon" style="font-size: 17px;">✉️</span>
+        <span>Messages</span>
+        <span class="nav-dot"></span>
+      </a>
+
+      <!-- 9. Notifications -->
+      <a href="../notifi/notifi.html" class="nav-item">
+        <span class="nav-icon">🔔</span>
+        <span>Notifications</span>
+      </a>
+
+      <!-- Logout -->
+      <a href="#" onclick="(function(){try{var u=JSON.parse(localStorage.getItem('logged_in'));if(u&&navigator.sendBeacon){var base=(window.location.port==='5000')?window.location.origin:'http://localhost:5000';navigator.sendBeacon(base+'/api/auth/logout', new Blob([JSON.stringify({userId:u.id||u._id})],{type:'application/json'}));}}catch(e){}localStorage.removeItem('logged_in'); window.location.href='../login/index.html';})(); return false;" class="nav-item">
+        <span class="nav-icon">⏻</span>
+        <span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- MAIN REPORT FOUND CONTAINER -->
+  <main class="main-content">
+    <div class="container" id="reportFoundApp">
+      <h2>Report Found Item</h2>
+      <p>Submit details of an item you found so our community and owner can identify and recover it.</p>
+
+      <div class="ai-box">
+        <strong>Community Finder Network</strong>
+        <p>Your submission helps safely reconnect lost belongings with verified owners.</p>
+      </div>
+
+      <form name="foundItemForm" ng-submit="vm.addReport();">
+        <div class="row">
+          <div class="form-group">
+            <label>Found Item Name</label>
+            <input type="text" ng-model="vm.itemName" required placeholder="e.g. Apple AirPods Pro with Case">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select ng-model="vm.category" ng-options="c for c in vm.categories"></select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Which Place Found (Location)</label>
+            <input type="text" ng-model="vm.location" required placeholder="e.g. Science Library, 2nd Floor, Desk 14">
+          </div>
+          <div class="form-group">
+            <label>Date Found</label>
+            <input type="date" ng-model="vm.dateFound">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-group">
+            <label>Brand / Manufacturer</label>
+            <input type="text" ng-model="vm.brand" placeholder="e.g. Apple, Sony, Fossil">
+          </div>
+        </div>
+
+        <!-- Photo Upload Field -->
+        <div class="form-group">
+          <label>Photo Upload</label>
+          <input type="file" id="foundPhotoInput" accept="image/*" onchange="angular.element(this).scope().vm.handlePhotoUpload(this)">
+          <div class="photo-preview" ng-if="vm.photo" style="margin-top:10px; display:flex; align-items:center; gap:12px;">
+            <img ng-src="{{ vm.photo }}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:1px solid #ddd;">
+            <button type="button" ng-click="vm.clearPhoto()" style="background:#fdeaea; color:#e74c3c; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">Remove Photo</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-publish" ng-disabled="vm.isSubmitting">
+          <span ng-if="!vm.isSubmitting">&#10024; Publish Found Report</span>
+          <span ng-if="vm.isSubmitting">Publishing...</span>
+        </button>
+      </form>
+
+      <!-- REPORT PUBLISHED CONFIRMATION BANNER -->
+      <div class="success-banner" ng-if="vm.successMessage">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>{{ vm.successMessage }}</span>
+      </div>
+
+      <div class="error" ng-if="vm.errorMessage">Error: {{ vm.errorMessage }}</div>
+
+      <!-- MY SUBMITTED FOUND REPORTS (Connected directly to Node.js backend & MongoDB Atlas) -->
+      <div class="my-reports">
+        <h3>My Submitted Found Reports ({{ vm.myReports.length }})</h3>
+
+        <div class="empty-state" ng-if="vm.myReports.length === 0">
+          No found reports submitted yet. Fill the form above and click Publish.
+        </div>
+
+        <div class="report-row" ng-repeat="r in vm.myReports track by r._id">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <img ng-if="r.photo" ng-src="{{ r.photo }}" style="width:52px; height:52px; object-fit:cover; border-radius:6px; border:1px solid #ddd; flex-shrink:0;">
+            <div>
+              <strong>{{ r.itemName }}</strong> &nbsp;
+              <span class="status" ng-class="r.status">{{ r.status }}</span><br>
+              <small>{{ r.location }} • Found on {{ r.dateFound }} <span ng-if="r.brand">({{ r.brand }})</span></small>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn-update" ng-click="vm.updateReport(r);">Update Status</button>
+            <button class="btn-delete" ng-click="vm.removeReport(r);">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<script>
+angular.module('ReportFoundApp', [])
+  .controller('ReportFoundController', ReportFoundController);
+
+ReportFoundController.$inject = ['$http', '$timeout'];
+function ReportFoundController($http, $timeout) {
+  var vm = this;
+
+  var API_BASE = (window.location.port === '5000')
+    ? window.location.origin + '/api/found-reports'
+    : 'http://localhost:5000/api/found-reports';
+
+  vm.categories = ['Electronics', 'Personal Accessories', 'Bags', 'Keys', 'Documents', 'Jewelry', 'Other'];
+  vm.itemName = 'Apple AirPods Pro with Case';
+  vm.category = 'Electronics';
+  vm.brand = 'Apple';
+  vm.dateFound = new Date();
+  vm.location = 'Science Library, 2nd Floor, Desk 14';
+  vm.photo = '';
+
+  vm.myReports = [];
+  vm.errorMessage = '';
+  vm.successMessage = '';
+  vm.isSubmitting = false;
+
+  // Photo upload handling (converts to base64 Data URL)
+  vm.handlePhotoUpload = function (input) {
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        $timeout(function () {
+          vm.photo = e.target.result;
+        });
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  };
+
+  vm.clearPhoto = function () {
+    vm.photo = '';
+    var el = document.getElementById('foundPhotoInput');
+    if (el) el.value = '';
+  };
+
+  // READ: Load found reports from MongoDB Atlas
+  function loadReports() {
+    $http.get(API_BASE)
+      .then(function(res) {
+        vm.myReports = res.data;
+      })
+      .catch(function(err) {
+        console.warn('Backend API request error:', err);
+      });
+  }
+
+  loadReports();
+
+  // CREATE: Publish Found Report (POST to backend)
+  vm.addReport = function () {
+    if (!vm.itemName || !vm.itemName.trim()) return;
+
+    var dateFormatted = '';
+    if (vm.dateFound instanceof Date) {
+      dateFormatted = vm.dateFound.toISOString().split('T')[0];
+    } else if (vm.dateFound) {
+      dateFormatted = String(vm.dateFound);
+    }
+
+    var loggedUser = null;
+    try { loggedUser = JSON.parse(localStorage.getItem('logged_in')); } catch (e) { loggedUser = null; }
+
+    var payload = {
+      userId: loggedUser ? (loggedUser.id || loggedUser._id) : null,
+      itemName: vm.itemName,
+      category: vm.category,
+      location: vm.location,
+      dateFound: dateFormatted,
+      brand: vm.brand,
+      photo: vm.photo
+    };
+
+    vm.isSubmitting = true;
+    vm.errorMessage = '';
+    vm.successMessage = '';
+
+    $http.post(API_BASE, payload)
+      .then(function(res) {
+        vm.isSubmitting = false;
+        vm.successMessage = 'Report published. Check your Notifications for confirmation.';
+        vm.errorMessage = '';
+        vm.clearPhoto();
+        loadReports();
+      })
+      .catch(function(err) {
+        vm.isSubmitting = false;
+        vm.errorMessage = (err.data && err.data.error) ? err.data.error : 'Failed to publish found report.';
+      });
+  };
+
+  // UPDATE: Cycle status in MongoDB Atlas
+  vm.updateReport = function (report) {
+    if (!report || !report._id) return;
+    $http.put(API_BASE + '/' + report._id + '/status')
+      .then(function(res) {
+        report.status = res.data.status;
+      })
+      .catch(function(err) {
+        vm.errorMessage = 'Failed to update status in database.';
+      });
+  };
+
+  // DELETE: Remove found report in MongoDB Atlas
+  vm.removeReport = function (report) {
+    if (!report || !report._id) return;
+    $http.delete(API_BASE + '/' + report._id)
+      .then(function(res) {
+        var index = vm.myReports.indexOf(report);
+        if (index !== -1) {
+          vm.myReports.splice(index, 1);
+        }
+      })
+      .catch(function(err) {
+        vm.errorMessage = 'Failed to delete found report from database.';
+      });
+  };
+}
+</script>
+
+</body>
+</html>
